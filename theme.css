@@ -1,0 +1,38 @@
+/* Vocabulary: Learn and Test — app theme (made with the theme editor) */
+@import url("https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap");
+:root {
+  --brick: #1f3a68;
+  --brick-2: #2f5597;
+  --on-brick: #ffffff;
+  --splash-accent: #ffd36b;
+  --logo-bg: #ffffff;
+  --heading: #1f3a68;
+  --gold: #6ca2ea;
+  --sand: #eef2f8;
+  --paper: #ffffff;
+  --surface: #b6f7fb;
+  --ink: #1b2433;
+  --muted: #5d6b82;
+  --line: #d6deea;
+  --chip: #e3eaf5;
+  --tag-ink: #2a3f66;
+  --wordchip: #eef2f8;
+  --hover: #eaf0fa;
+  --mark: #f0e8d1;
+  --ok: #2f7d4a;
+  --ok-bg: #e6f3ea;
+  --bad: #b0352b;
+  --bad-bg: #fbe8e5;
+  --warn-bg: #fff8e6;
+  --warn-line: #f0d79a;
+  --note-ink: #0c1118;
+  --hi: "Mukta", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --en: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-size: 105%;
+  --word-size: 1.75rem;
+  --radius: 18px;
+  --railw: 50px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --sand: #0f141c; --paper: #18202c; --surface: #18202c; --wordchip: #1d2734; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2b3645; --heading: #9ec1ff; --chip: #22304a; --tag-ink: #c6d6f2; --hover: #22304a; --mark: #5a4a17; --ok: #7fd39b; --ok-bg: #1d2e22; --bad: #f19a8f; --bad-bg: #3a201c; --warn-bg: #211d14; --warn-line: #54451f; --note-ink: #d6cbb0; color-scheme: dark; }
+}

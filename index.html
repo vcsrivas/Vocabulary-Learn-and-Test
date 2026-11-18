@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3a68">
+<meta name="description" content="Vocabulary: Learn and Test. Five expert English words a day, with practice tests and quizzes. Developed by Dr. V C Srivastava.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vocabulary">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<title>Vocabulary: Learn and Test</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* Default theme. The colours, fonts and sizes actually used come from theme.css (made with the theme editor), which is loaded after this and overrides these values. */
+:root {
+  --brick: #1f3a68; --brick-2: #2f5597; --on-brick: #ffffff; --heading: #1f3a68; --gold: #6ca2ea;
+  --sand: #eef2f8; --paper: #ffffff; --surface: #b6f7fb; --ink: #1b2433; --muted: #5d6b82; --line: #d6deea;
+  --chip: #e3eaf5; --tag-ink: #2a3f66; --hover: #eaf0fa; --mark: #f0e8d1;
+  --warn-bg: #fff8e6; --warn-line: #f0d79a; --note-ink: #0c1118; --wordchip: var(--sand);
+  --ok: #2f7d4a; --ok-bg: #e6f3ea; --bad: #b0352b; --bad-bg: #fbe8e5;
+  --shadow: 0 1px 2px rgba(60, 30, 10, .06), 0 4px 14px rgba(60, 30, 10, .07);
+  --hi: "Mukta", "Noto Sans Devanagari", "Nirmala UI", "Mangal", "Kohinoor Devanagari", sans-serif;
+  --en: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --text-size: 105%; --word-size: 1.75rem; --radius: 18px; --tabh: 64px; --railw: 50px;
+  --logo-bg: #ffffff; --splash-accent: #ffd36b;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --sand: #0f141c; --paper: #18202c; --surface: #18202c; --wordchip: #1d2734; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2b3645;
+    --heading: #9ec1ff; --chip: #22304a; --tag-ink: #c6d6f2; --hover: #22304a; --mark: #5a4a17; --warn-bg: #211d14; --warn-line: #54451f;
+    --note-ink: #d6cbb0; --ok: #7fd39b; --ok-bg: #1d2e22; --bad: #f19a8f; --bad-bg: #3a201c; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; font-size: var(--text-size); }
+body { margin: 0; background: var(--sand); color: var(--ink); font-family: var(--hi); line-height: 1.5;
+  padding-left: calc(var(--railw) + env(safe-area-inset-left)); -webkit-tap-highlight-color: transparent; }
+[lang="en"], .card, .qcard, .panel, .word-chip, .opt, .seg, .dict, .install, .sheet-panel, .credit, .disclaimer p[lang="en"], .qtop { font-family: var(--en); }
+.panel h3 [lang="hi"], [lang="hi"] { font-family: var(--hi); }
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+
+/* App bar */
+.app-bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top)) 16px 10px; background: linear-gradient(135deg, var(--brick), var(--brick-2));
+  color: var(--on-brick); box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+.app-logo { width: 40px; height: 40px; border-radius: 10px; background: var(--logo-bg); flex: none; display: grid; place-items: center; }
+.app-names { min-width: 0; }
+.app-names h1 { margin: 0; font-size: min(1.08rem, 4.4vw); line-height: 1.2; letter-spacing: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-names p { margin: 3px 0 0; font-size: .74rem; opacity: .85; }
+
+main { max-width: 640px; margin: 0 auto; padding: 14px 14px 24px; }
+.view[hidden] { display: none; }
+.day-head { margin: 4px 2px 12px; }
+.day-head h2 { margin: 0; font-size: 1.3rem; color: var(--heading); }
+.date-line { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+.streak { display: inline-block; margin-top: 6px; background: var(--chip); color: var(--tag-ink); border-radius: 999px; padding: 2px 10px; font-size: .8rem; font-weight: 600; }
+
+/* Word cards */
+.cards { display: grid; gap: 12px; }
+.card { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px 16px 14px; box-shadow: var(--shadow); border-top: 4px solid var(--gold); }
+.card .num { position: absolute; top: 12px; right: 14px; color: var(--gold); font-weight: 700; font-size: .95rem; }
+.card .word { margin: 0 34px 6px 0; font-size: var(--word-size); line-height: 1.2; font-weight: 700; color: var(--heading); overflow-wrap: anywhere; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag { background: var(--chip); color: var(--tag-ink); border-radius: 999px; padding: 2px 10px; font-size: .78rem; }
+.tag.pos { font-style: italic; font-weight: 600; }
+.lbl { display: block; color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .6px; margin: 10px 0 2px; }
+.meaning { margin: 0; font-size: 1.06rem; }
+.usage { margin: 0; padding-left: 10px; border-left: 3px solid var(--gold); font-style: italic; }
+.usage mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 2px; font-style: normal; font-weight: 600; }
+.olist { margin: 0; padding-left: 20px; } .olist li { margin-bottom: 3px; }
+.olist .op { font-style: italic; color: var(--tag-ink); font-weight: 600; margin-right: 4px; }
+.syns { display: flex; flex-wrap: wrap; gap: 6px; }
+.syn { border: 1px solid var(--line); background: var(--wordchip); border-radius: 999px; padding: 4px 11px; font-size: .9rem; cursor: pointer; }
+.syn::after { content: " ↗"; font-size: .7rem; color: var(--muted); }
+.dicts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.dict { display: block; text-align: center; text-decoration: none; padding: 9px 6px; border-radius: max(0px, calc(var(--radius) - 6px));
+  border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: .9rem; }
+.dict.main { background: var(--brick); color: var(--on-brick); border-color: var(--brick); }
+.dict.wide { grid-column: 1 / -1; }
+.dict small { opacity: .7; }
+
+/* History */
+.history { display: grid; gap: 14px; }
+.day { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px 14px; box-shadow: var(--shadow); }
+.day-title { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.day-title strong { color: var(--heading); font-size: 1.02rem; }
+.day-title span { color: var(--muted); font-size: .8rem; }
+.word-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.word-chip { border: 1px solid var(--line); background: var(--wordchip); border-radius: max(0px, calc(var(--radius) - 4px));
+  padding: 8px 12px; font-size: 1.02rem; cursor: pointer; text-align: left; }
+.word-chip:hover, .word-chip:focus-visible { border-color: var(--gold); outline: none; background: var(--hover); }
+.word-chip.miss { border-color: var(--warn-line); background: var(--warn-bg); }
+.empty { text-align: center; color: var(--muted); padding: 24px 10px; }
+.revise { border-left: 5px solid var(--gold); }
+
+/* Panels, buttons, tests */
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
+.panel h3 { margin: 0 0 6px; font-size: 1.05rem; color: var(--heading); }
+.panel p { margin: 0 0 8px; }
+.note { color: var(--muted); font-size: .88rem; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+.seg button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 13px; cursor: pointer; font-size: .9rem; }
+.seg button[aria-pressed="true"] { background: var(--brick); color: var(--on-brick); border-color: var(--brick); }
+.btn { display: inline-block; border: 0; border-radius: max(0px, calc(var(--radius) - 4px)); padding: 11px 18px; font-weight: 700; cursor: pointer;
+  background: var(--brick); color: var(--on-brick); text-decoration: none; }
+.btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+.btn.full { width: 100%; }
+.btn[disabled] { opacity: .45; cursor: default; }
+.row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.qtop { display: flex; justify-content: space-between; align-items: center; font-size: .88rem; color: var(--muted); margin-bottom: 6px; }
+.bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
+.bar i { display: block; height: 100%; background: var(--gold); width: 0; transition: width .25s; }
+.qcard { background: var(--paper); border: 1px solid var(--line); border-top: 4px solid var(--gold); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+.qask { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .6px; }
+.qword { font-size: 1.7rem; font-weight: 700; color: var(--heading); margin: 2px 0 2px; overflow-wrap: anywhere; }
+.qtext { font-size: 1.1rem; margin: 6px 0 2px; }
+.qtext .blank { display: inline-block; min-width: 70px; border-bottom: 2px solid var(--gold); }
+.opts { display: grid; gap: 8px; margin-top: 12px; }
+.opt { text-align: left; border: 1.5px solid var(--line); background: var(--paper); border-radius: max(0px, calc(var(--radius) - 4px));
+  padding: 11px 12px; cursor: pointer; display: flex; gap: 10px; align-items: flex-start; font-size: .98rem; }
+.opt b { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--chip); color: var(--tag-ink); display: grid; place-items: center; font-size: .8rem; }
+.opt:not([disabled]):hover { border-color: var(--gold); background: var(--hover); }
+.opt.right { border-color: var(--ok); background: var(--ok-bg); }
+.opt.right b { background: var(--ok); color: #fff; }
+.opt.wrong { border-color: var(--bad); background: var(--bad-bg); }
+.opt.wrong b { background: var(--bad); color: #fff; }
+.opt[disabled] { cursor: default; }
+.feedback { margin-top: 12px; padding: 10px 12px; border-radius: max(0px, calc(var(--radius) - 6px)); font-size: .93rem; }
+.feedback.ok { background: var(--ok-bg); } .feedback.no { background: var(--bad-bg); }
+.feedback b.v { display: block; margin-bottom: 2px; }
+.linkbtn { border: 0; background: none; color: var(--heading); font-weight: 600; text-decoration: underline; cursor: pointer; padding: 0; }
+.result { text-align: center; }
+.big-score { font-size: 3rem; font-weight: 800; color: var(--heading); line-height: 1.1; margin: 6px 0 0; }
+.ring { width: 120px; height: 120px; margin: 4px auto 0; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0 10px; }
+.stat { background: var(--wordchip); border: 1px solid var(--line); border-radius: max(0px, calc(var(--radius) - 6px)); padding: 8px 6px; text-align: center; }
+.stat b { display: block; font-size: 1.25rem; color: var(--heading); }
+.stat span { font-size: .75rem; color: var(--muted); }
+.scores { list-style: none; margin: 0; padding: 0; }
+.scores li { display: flex; justify-content: space-between; gap: 8px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .9rem; }
+.scores li:first-child { border-top: 0; }
+.scores .pc { font-weight: 700; }
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 54px; margin: 6px 0 4px; }
+.spark i { flex: 0 1 22px; background: var(--gold); border-radius: 3px 3px 0 0; min-height: 3px; opacity: .85; }
+
+/* Search (two-way: by word, or by words in the meaning) */
+.search-wrap { position: relative; margin-bottom: 14px; }
+#searchInput { width: 100%; font: 1.05rem var(--en); padding: 13px 16px; border-radius: max(0px, calc(var(--radius) - 2px));
+  border: 2px solid var(--line); background: var(--paper); color: var(--ink); outline: none; }
+#searchInput:focus { border-color: var(--gold); }
+.suggestions { list-style: none; margin: 6px 0 0; padding: 4px; position: absolute; left: 0; right: 0; z-index: 4; font-family: var(--en);
+  background: var(--paper); border: 1px solid var(--line); border-radius: max(0px, calc(var(--radius) - 2px)); box-shadow: var(--shadow); max-height: 60vh; overflow-y: auto; }
+.suggestions li { padding: 9px 12px; border-radius: max(0px, calc(var(--radius) - 6px)); cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+.suggestions li[aria-selected="true"], .suggestions li:hover { background: var(--hover); }
+.suggestions .s-w { color: var(--heading); font-weight: 600; font-size: 1rem; }
+.suggestions .s-w small { color: var(--muted); font-weight: 400; font-style: italic; margin-left: 6px; }
+.suggestions .s-sub { font-size: .9rem; color: var(--muted); }
+.suggestions mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1px; }
+.suggestions .s-none { color: var(--muted); cursor: default; }
+.suggestions .s-head { font-size: .72rem; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); cursor: default; padding: 8px 12px 2px; }
+.suggestions .s-head:hover { background: none; }
+.hint { color: var(--muted); font-size: .92rem; line-height: 2.1; font-family: var(--en); }
+.chip-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 10px; font: .88rem var(--en); cursor: pointer; color: var(--ink); }
+
+/* Control panel (opened with #control-panel at the end of the app's address) */
+#cp { position: fixed; inset: 0; z-index: 40; background: #eef0f3; color: #1d232b; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; display: grid; grid-template-columns: 340px 1fr; }
+#cp[hidden] { display: none !important; }
+#cp * { box-sizing: border-box; }
+#cp aside { background: #fff; border-right: 1px solid #d9dee5; overflow-y: auto; padding: 16px 16px 40px; }
+#cp .cp-main { overflow: auto; padding: 16px 20px 40px; }
+#cp h1 { font-size: 1.1rem; margin: 0 0 4px; }
+#cp .cp-lead { color: #5d6773; font-size: .85rem; margin: 0 0 10px; }
+#cp details { border-top: 1px solid #d9dee5; padding: 9px 0; }
+#cp summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+#cp summary::-webkit-details-marker { display: none; }
+#cp summary::after { content: "+"; color: #5d6773; } #cp details[open] > summary::after { content: "–"; }
+#cp .cp-rows { display: grid; gap: 7px; margin-top: 8px; }
+#cp .cp-row { display: grid; grid-template-columns: 1fr 34px 78px; gap: 8px; align-items: center; font-size: .86rem; line-height: 1.25; }
+#cp .cp-row small, #cp .cp-field small { display: block; color: #5d6773; font-size: .74rem; }
+#cp input[type=color] { width: 34px; height: 30px; padding: 0; border: 1px solid #d9dee5; border-radius: 6px; background: none; cursor: pointer; }
+#cp input[type=text], #cp select { width: 100%; height: 30px; border: 1px solid #d9dee5; border-radius: 6px; background: #f6f7f9; color: #1d232b; padding: 0 8px; font: 12.5px system-ui, sans-serif; }
+#cp input[type=text].bad { border-color: #d33; }
+#cp .cp-field { display: grid; gap: 4px; font-size: .86rem; }
+#cp .cp-range { display: grid; grid-template-columns: 1fr 58px; gap: 8px; align-items: center; }
+#cp .cp-range output { font-size: .8rem; color: #5d6773; text-align: right; }
+#cp .cp-presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+#cp .cp-preset { border: 1px solid #d9dee5; background: #f6f7f9; color: #1d232b; border-radius: 8px; padding: 6px 4px; cursor: pointer; font: .8rem system-ui, sans-serif; display: grid; gap: 4px; justify-items: center; }
+#cp .cp-preset .sw { display: flex; gap: 2px; } #cp .cp-preset .sw i { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(0,0,0,.1); }
+#cp .cp-btn { border: 0; border-radius: 8px; padding: 9px 14px; font: 600 .9rem system-ui, sans-serif; cursor: pointer; background: #2459c9; color: #fff; }
+#cp .cp-btn.ghost { background: #f6f7f9; color: #1d232b; border: 1px solid #d9dee5; }
+#cp .cp-btn[disabled] { opacity: .5; cursor: default; }
+#cp .cp-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
+#cp .cp-top { position: sticky; top: -16px; background: #eef0f3; padding: 8px 0 10px; z-index: 2; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+#cp .cp-seg { display: inline-flex; border: 1px solid #d9dee5; border-radius: 8px; overflow: hidden; background: #fff; }
+#cp .cp-seg button { border: 0; background: none; padding: 7px 13px; font: 500 .85rem system-ui, sans-serif; cursor: pointer; color: #1d232b; }
+#cp .cp-seg button[aria-pressed="true"] { background: #2459c9; color: #fff; }
+#cp .cp-phones { display: flex; flex-wrap: wrap; gap: 20px; }
+#cp figure { margin: 0; display: grid; gap: 6px; justify-items: center; }
+#cp figcaption { font-weight: 600; font-size: .9rem; }
+#cp .cp-phone { width: 376px; border: 8px solid #1f2329; border-radius: 28px; overflow: hidden; background: #1f2329; }
+#cp .cp-phone iframe { display: block; width: 360px; height: 680px; border: 0; border-radius: 20px; background: #fff; }
+#cp .cp-status { font-size: .85rem; color: #5d6773; }
+#cp .cp-status.ok { color: #2f7d4a; font-weight: 600; } #cp .cp-status.err { color: #b0352b; font-weight: 600; }
+#cp textarea { width: 100%; height: 160px; border: 1px solid #d9dee5; border-radius: 8px; background: #f6f7f9; font: 11.5px/1.4 ui-monospace, Consolas, monospace; padding: 8px; resize: vertical; }
+#cp .cp-note { color: #5d6773; font-size: .82rem; }
+@media (max-width: 820px) { #cp { display: block; overflow-y: auto; } #cp aside { border-right: 0; border-bottom: 1px solid #d9dee5; } #cp .cp-main { overflow: visible; }
+  #cp .cp-phones { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; } #cp .cp-top { position: static; } }
+#cp .cp-prow { display: grid; grid-template-columns: 1fr 150px 28px; gap: 8px; align-items: center; font-size: .86rem; }
+#cp .cp-prow label small { display: block; color: #8a94a1; font-size: .72rem; }
+#cp .cp-prow input[type=color] { width: 100%; }
+#cp .cp-prow .cp-range { grid-template-columns: 1fr 44px; }
+#cp .cp-x { border: 1px solid #d9dee5; background: #fff; border-radius: 6px; height: 28px; cursor: pointer; color: #b0352b; }
+#cp .cp-x[disabled] { color: #c7ccd3; cursor: default; }
+#cp #cpPartSel { height: 34px; font-size: .9rem; }
+#cp #cpChanged a { color: #2459c9; }
+
+/* Disclaimer */
+.disclaimer { margin-top: 18px; background: var(--warn-bg); border: 1px solid var(--warn-line); border-left: 5px solid var(--gold);
+  border-radius: max(0px, calc(var(--radius) - 4px)); padding: 12px 14px; font-size: .9rem; }
+.disclaimer h3 { margin: 0 0 6px; font-size: .98rem; color: var(--heading); }
+.disclaimer p { margin: 0; }
+.disclaimer p[lang="en"] { color: var(--note-ink); }
+.credit { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 14px; }
+
+/* Bottom tab bar */
+/* Tab strip on the left: labels run upwards (first letter at the bottom), icon first */
+.tab-bar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 6; width: calc(var(--railw) + env(safe-area-inset-left));
+  padding: calc(var(--barh, 70px) + 8px) 5px calc(8px + env(safe-area-inset-bottom)) calc(5px + env(safe-area-inset-left));
+  display: flex; flex-direction: column; gap: 6px;
+  background: var(--surface); border-right: 1px solid var(--line); box-shadow: 2px 0 10px rgba(0,0,0,.05); }
+.tab-bar button { flex: 1 1 0; min-height: 0; border: 0; background: none; cursor: pointer; color: var(--muted);
+  display: flex; align-items: center; justify-content: center; overflow: visible; border-radius: 12px; padding: 0; position: relative; }
+/* The label is laid out normally (icon first, then the name) and turned a quarter-turn anticlockwise,
+   so it reads from bottom to top on every phone (this does not depend on writing-mode, which some browsers ignore on buttons). */
+.tab-bar .tl { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transform: rotate(-90deg); font-size: .9rem; letter-spacing: .3px; }
+.tab-bar .ti { font-size: 1.15rem; filter: grayscale(1); opacity: .7; display: inline-block; transform: rotate(90deg); }
+.tab-bar button.active { color: var(--heading); font-weight: 700; background: var(--paper); box-shadow: inset 3px 0 0 var(--brick); }
+.tab-bar button.active .ti { filter: none; opacity: 1; }
+.app-bar { margin-left: calc(-1 * (var(--railw) + env(safe-area-inset-left))); padding-left: calc(16px + env(safe-area-inset-left)); z-index: 7; }
+.about-btn { margin-left: auto; flex: none; border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12); color: var(--on-brick);
+  border-radius: 999px; width: 38px; height: 38px; padding: 0; font-size: 1.1rem; cursor: pointer; display: grid; place-items: center; }
+.about-btn.active { background: var(--on-brick); color: var(--brick); }
+
+/* Bottom sheet */
+.sheet { position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; justify-content: center; }
+.sheet[hidden] { display: none; }
+.sheet-backdrop { position: absolute; inset: 0; background: rgba(30, 15, 5, .45); }
+.sheet-panel { position: relative; width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; background: var(--sand);
+  border-radius: calc(var(--radius) + 4px) calc(var(--radius) + 4px) 0 0; padding: 22px 16px calc(20px + env(safe-area-inset-bottom)); animation: up .18s ease-out; }
+@media (min-width: 640px) { .sheet { align-items: center; } .sheet-panel { border-radius: calc(var(--radius) + 4px); } }
+@keyframes up { from { transform: translateY(30px); opacity: .4; } to { transform: none; opacity: 1; } }
+.sheet-close { position: absolute; top: 6px; right: 8px; border: 0; background: transparent; font-size: 1.25rem; padding: 6px 10px; cursor: pointer; color: var(--muted); z-index: 2; }
+.sheet-panel .card { box-shadow: none; }
+.sheet-from { margin: 0 0 8px; color: var(--muted); font-size: .82rem; }
+.pick-word { font-size: 1.5rem; font-weight: 700; color: var(--heading); margin: 0 0 12px; }
+
+/* Splash, toast, misc */
+.splash { position: fixed; inset: 0; z-index: 20; background: linear-gradient(160deg, var(--brick), var(--brick-2)); color: var(--on-brick);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; transition: opacity .35s; }
+.splash.hide { opacity: 0; pointer-events: none; }
+.splash h1 { font: 700 2.4rem/1.15 var(--hi); margin: 10px 0 6px; }
+.splash h1 em { font-style: normal; color: var(--splash-accent); }
+.splash .tl { opacity: .9; }
+.splash .dev { margin-top: 26px; font-size: .8rem; opacity: .75; text-transform: uppercase; letter-spacing: 1px; }
+.splash .devn { font-size: 1.15rem; font-weight: 700; }
+.splash .btn { margin-top: 26px; background: var(--on-brick); color: var(--brick); padding: 12px 30px; border-radius: 999px; }
+.toast { position: fixed; left: calc(50% + var(--railw) / 2); bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--paper);
+  padding: 10px 16px; border-radius: 10px; font-size: .9rem; opacity: 0; pointer-events: none; transition: .25s; z-index: 30; max-width: 90vw; }
+.toast.show { opacity: 1; transform: translateX(-50%); }
+.loading, .load-error { text-align: center; color: var(--muted); padding: 24px 10px; }
+.load-error { background: var(--warn-bg); border: 1px solid var(--warn-line); border-radius: max(0px, calc(var(--radius) - 4px)); color: var(--ink); }
+.install { display: none; align-items: center; gap: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 12px; }
+.install.show { display: flex; }
+.install .ix { border: 0; background: none; font-size: 1.2rem; color: var(--muted); cursor: pointer; }
+.howto ol { padding-left: 20px; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div class="splash" id="splash">
+  <svg viewBox="0 0 64 64" width="84" height="84" aria-hidden="true"><use href="#diya"/></svg>
+  <h1>Vocabulary<br><em>Learn and Test</em></h1>
+  <div class="tl">Five expert words a day · practice · quiz</div>
+  <div class="dev">This app is developed by</div>
+  <div class="devn">Dr. V C Srivastava</div>
+  <button class="btn" id="goBtn" type="button">Start learning</button>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <linearGradient id="fl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".6" stop-color="#f5a13a"/><stop offset="1" stop-color="#e2663a"/></linearGradient>
+  <linearGradient id="bw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4bd52"/><stop offset="1" stop-color="#b8741a"/></linearGradient>
+  <symbol id="diya" viewBox="0 0 64 64"><g fill="#ffd36b"><circle cx="13" cy="25" r="2"/><circle cx="19" cy="14" r="2"/><circle cx="32" cy="8.5" r="2.2"/><circle cx="45" cy="14" r="2"/><circle cx="51" cy="25" r="2"/></g>
+    <path d="M32 15 C 35.5 21, 39.5 25, 39.5 30.5 C 39.5 35, 36 38.5, 32 38.5 C 28 38.5, 24.5 35, 24.5 30.5 C 24.5 25, 28.5 21, 32 15 Z" fill="url(#fl)"/>
+    <path d="M32 25 C 33.6 28, 35.2 30, 35.2 32.6 C 35.2 34.6, 33.8 36, 32 36 C 30.2 36, 28.8 34.6, 28.8 32.6 C 28.8 30, 30.4 28, 32 25 Z" fill="#fff4d0"/>
+    <path d="M8 40 C 14 39, 22 39.5, 32 39.5 C 42 39.5, 50 39, 60 37 C 58 44, 52 47, 50 48 C 47 54, 40 57, 32 57 C 22 57, 13 52, 8 40 Z" fill="url(#bw)"/>
+    <path d="M8 40 C 14 39, 22 39.5, 32 39.5 C 42 39.5, 50 39, 60 37" stroke="#ffe3a0" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<header class="app-bar">
+  <div class="app-logo"><svg viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><use href="#diya"/></svg></div>
+  <div class="app-names"><h1>Vocabulary: Learn and Test</h1><p lang="en">Expert English · 5 words a day</p></div>
+  <button class="about-btn" type="button" data-v="about" aria-label="About the app" title="About">ℹ️</button>
+</header>
+
+<main>
+  <!-- Today -->
+  <section class="view" id="v-today">
+    <div class="day-head"><h2>Today's words</h2><p class="date-line" id="todaySub"></p><span class="streak" id="streak" hidden></span></div>
+    <div class="install" id="installBar"><div style="flex:1"><b>Install Vocabulary: Learn and Test</b><div class="note">Add it to your home screen like an app</div></div>
+      <button class="btn" data-install="1" type="button">Install</button><button class="ix" id="installClose" type="button" aria-label="Dismiss">×</button></div>
+    <div class="cards" id="todayCards"><div class="loading">Loading word list…</div></div>
+    <p class="credit">Developed by <b>Dr. V C Srivastava</b></p>
+  </section>
+
+  <!-- History -->
+  <section class="view" id="v-history" hidden>
+    <div class="day-head"><h2>History</h2><p class="date-line">Every day's words on this phone. Tap a word to see its card.</p></div>
+    <div class="history" id="historyList"></div>
+  </section>
+
+  <!-- Search -->
+  <section class="view" id="v-search" hidden>
+    <div class="day-head"><h2>Search</h2><p class="date-line">Type a word, or a word from a meaning, and pick a suggestion to see the word card.</p></div>
+    <div class="search-wrap">
+      <input id="searchInput" type="search" placeholder="e.g. candid, or a meaning such as angry" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"
+        role="combobox" aria-expanded="false" aria-controls="suggestions" aria-autocomplete="list" aria-label="Search by word or meaning">
+      <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+    </div>
+    <div id="searchResult" class="cards"></div>
+    <p id="searchHint" class="hint"></p>
+  </section>
+
+  <!-- Practice -->
+  <section class="view" id="v-practice" hidden>
+    <div class="day-head"><h2>Practice test</h2><p class="date-line">Questions from the whole word list, chosen at random.</p></div>
+    <div id="practiceBox"></div>
+  </section>
+
+  <!-- Quiz -->
+  <section class="view" id="v-quiz" hidden>
+    <div class="day-head"><h2>Quiz</h2><p class="date-line">Questions only from the words you have learnt in your daily cards.</p></div>
+    <div id="quizBox"></div>
+  </section>
+
+  <!-- About -->
+  <section class="view" id="v-about" hidden>
+    <div class="day-head"><h2>About</h2><p class="date-line">About the app</p></div>
+    <div class="panel"><h3>Your progress</h3><div class="stats" id="aboutStats"></div><p class="note" id="aboutProgress"></p></div>
+    <div class="panel" id="installPanel"><h3>Install the app</h3><p>Add Vocabulary: Learn and Test to your home screen so it opens like an app.</p><button class="btn ghost" data-install="1" type="button">Install the app</button></div>
+    <div class="panel"><h3>How to use</h3>
+      <p><b>Today</b> shows five new words every day. No word is repeated until the whole list has been covered.</p>
+      <p><b>Search</b> works both ways: type a word to find its card, or type a word from a meaning (such as <i>angry</i> or <i>praise</i>) to find words with that meaning.</p>
+      <p><b>History</b> keeps every day's words. Words you got wrong in a test are listed at the top under <i>Words to revise</i>.</p>
+      <p>Use the strip on the left to move between <b>Today</b>, <b>History</b>, <b>Practice Test</b>, <b>Quiz</b> and <b>Search</b>. This page opens from the <b>About</b> button at the top.</p>
+      <p><b>Practice Test</b> tests you on words from the whole list. <b>Quiz</b> tests you only on the words you have already learnt. Both have three kinds of question: word → meaning, meaning → word, and fill in the blank.</p>
+      <p>Every word has <b>Oxford</b> and <b>Cambridge</b> buttons that open its entry in those dictionaries. Tap a synonym to look it up too.</p>
+      <p class="note">Your words, scores and revision list are kept only on this phone.</p></div>
+    <div class="panel"><h3>Start again</h3><p class="note">Clear test scores and the revision list on this phone. Your daily words are kept.</p><button class="btn ghost" type="button" id="clearScores">Clear scores and revision list</button></div>
+    <aside class="disclaimer" role="note"><h3>Disclaimer</h3><p lang="en">This app has been made using an AI platform. Although much care has been taken for its correctness, it may still contain errors, so please use it with caution and check important words in a standard dictionary.</p></aside>
+    <p class="credit">Vocabulary: Learn and Test · Developed by <b>Dr. V C Srivastava</b></p>
+  </section>
+</main>
+
+<nav class="tab-bar" aria-label="Sections">
+  <button type="button" data-v="today" class="active"><span class="tl"><span class="ti" aria-hidden="true">📅</span><span>Today</span></span></button>
+  <button type="button" data-v="history"><span class="tl"><span class="ti" aria-hidden="true">🕘</span><span>History</span></span></button>
+  <button type="button" data-v="practice"><span class="tl"><span class="ti" aria-hidden="true">✍️</span><span>Practice Test</span></span></button>
+  <button type="button" data-v="quiz"><span class="tl"><span class="ti" aria-hidden="true">🏆</span><span>Quiz</span></span></button>
+  <button type="button" data-v="search"><span class="tl"><span class="ti" aria-hidden="true">🔍</span><span>Search</span></span></button>
+</nav>
+
+<div class="sheet" id="sheet" hidden><div class="sheet-backdrop" data-close="1"></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true"><button class="sheet-close" type="button" data-close="1" aria-label="Close">✕</button><div id="sheetBody"></div></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div id="cp" hidden></div>
+
+<script>
+"use strict";
+const PER_DAY = 5;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ls = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} }, del(k) { try { localStorage.removeItem(k); } catch (_) {} } };
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2600); }
+function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return (h >>> 0).toString(36); }
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ---------- word list (words.xlsx, every tab with Word and Meaning columns) ---------- */
+let LIST = null;
+const COLS = { word: /^word$/, pos: /^part of speech$/, meaning: /^meaning$/, usage: /^usage/, syn: /^synonyms?$/, other: /^other meanings?$/, msrc: /^meaning source$/ };
+function parseWorkbook(wb) {
+  return parseSheets(wb.SheetNames.map(name => XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: "" })));
+}
+function parseSheets(sheets) {
+  const all = [], seen = new Set();
+  for (const rows of sheets) {
+    let h = -1, idx = {};
+    for (let r = 0; r < Math.min(rows.length, 15) && h < 0; r++) {
+      const row = rows[r].map(c => String(c).trim().toLowerCase());
+      if (row.includes("word") && row.includes("meaning")) { h = r; for (const k in COLS) idx[k] = row.findIndex(c => COLS[k].test(c)); }
+    }
+    if (h < 0) continue;
+    for (const r of rows.slice(h + 1)) {
+      const g = k => idx[k] >= 0 ? String(r[idx[k]] ?? "").trim() : "";
+      const w = g("word"), m = g("meaning"); if (!w || !m) continue;
+      const key = w.toLowerCase(); if (seen.has(key)) continue; seen.add(key);
+      all.push({ w, key, pos: g("pos"), m, u: g("usage"), syn: g("syn"), o: g("other"), msrc: g("msrc") });
+    }
+  }
+  return all;
+}
+async function loadList() {
+  let all;
+  try {
+    if (typeof XLSX === "undefined") throw new Error("Excel reader not loaded");
+    const r = await fetch("words.xlsx", { cache: "no-cache" }); if (!r.ok) throw new Error("words.xlsx not found (" + r.status + ")");
+    all = parseWorkbook(XLSX.read(await r.arrayBuffer(), { type: "array" }));
+  } catch (err) {
+    /* Fallback: the same word list saved as words.json (an array of rows, header row first). */
+    const r = await fetch("words.json", { cache: "no-cache" }).catch(() => null);
+    if (!r || !r.ok) throw err;
+    all = parseSheets([await r.json()]);
+  }
+  if (!all.length) throw new Error("No tab with Word and Meaning columns");
+  const map = {}; all.forEach(e => map[e.key] = e);
+  return { all, map, version: hash(all.length + "|" + all.map(e => e.key).join(",")) };
+}
+
+/* ---------- five random words a day, no repeats until the list is covered ---------- */
+function rng(seed) { let s = seed >>> 0; return () => { s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+let ORDER = null, PROG = null;
+function order() {
+  if (ORDER && ORDER.v === LIST.version) return ORDER.p;
+  const N = LIST.all.length, p = new Uint32Array(N); for (let i = 0; i < N; i++) p[i] = i;
+  const r = rng(parseInt(LIST.version, 36)); for (let i = N - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); const t = p[i]; p[i] = p[j]; p[j] = t; }
+  ORDER = { v: LIST.version, p }; return p;
+}
+const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const today = () => ymd(new Date());
+function ensureToday() {
+  const td = today();
+  if (!PROG || !PROG.days) PROG = { version: LIST.version, pos: 0, cycle: [], days: {} };
+  const prev = (PROG.days[td] || []).filter(k => LIST.map[k]);
+  if (prev.length >= Math.min(PER_DAY, LIST.all.length)) return prev;
+  if (PROG.version !== LIST.version) { PROG.version = LIST.version; PROG.pos = 0; }
+  const p = order(), N = p.length, shown = new Set(PROG.cycle), pick = [...prev];
+  if ([...shown].filter(k => LIST.map[k]).length >= N) { PROG.cycle = []; shown.clear(); }
+  let guard = 0;
+  while (pick.length < Math.min(PER_DAY, N) && guard++ < N * 2) {
+    const e = LIST.all[p[PROG.pos % N]]; PROG.pos = (PROG.pos + 1) % N;
+    if (shown.has(e.key) || pick.includes(e.key)) continue; pick.push(e.key);
+    if (shown.size + pick.length >= N && pick.length < PER_DAY) { PROG.cycle = []; shown.clear(); }
+  }
+  PROG.cycle.push(...pick.filter(k => !prev.includes(k))); PROG.days[td] = pick; ls.set("wt3_prog", PROG); return pick;
+}
+const learnedKeys = () => [...new Set(Object.values(PROG?.days || {}).flat())].filter(k => LIST && LIST.map[k]);
+function streak() {
+  const days = new Set(Object.keys(PROG?.days || {})); let n = 0; const d = new Date();
+  while (days.has(ymd(d))) { n++; d.setDate(d.getDate() - 1); } return n;
+}
+
+/* ---------- word card ---------- */
+const oxfordUrl = w => "https://www.oxfordlearnersdictionaries.com/search/english/?q=" + encodeURIComponent(w);
+const cambridgeUrl = w => "https://dictionary.cambridge.org/search/english/direct/?q=" + encodeURIComponent(w);
+const POSAB = { nou: "noun", noun: "noun", adj: "adjective", ver: "verb", verb: "verb", adv: "adverb" };
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function stemRe(word) {
+  const f = word.toLowerCase(); const stem = f.length > 4 ? f.replace(/(e|y|es|s|ed|ing)$/, "") : f;
+  return stem.length < 3 ? null : new RegExp("\\b(" + reEsc(stem) + "[\\w-]*)", "i");
+}
+function hl(text, word) { const t = esc(text), re = stemRe(word); return re ? t.replace(re, "<mark>$1</mark>") : t; }
+const listOf = s => String(s || "").split(/\s*[,;]\s*/).map(x => x.trim()).filter(Boolean).slice(0, 8);
+function others(s) {
+  return String(s || "").split(/\s*\|\s*/).map(x => x.trim()).filter(Boolean).slice(0, 4).map(x => {
+    const m = x.match(/^\((\w+)\.?\)\s*(.*)$/); return m ? { p: POSAB[m[1].toLowerCase()] || m[1], t: m[2].replace(/[;\]]+$/, "") } : { p: "", t: x.replace(/[;\]]+$/, "") };
+  });
+}
+function cardHTML(key, num) {
+  const e = LIST.map[key]; if (!e) return "";
+  const ot = others(e.o), sy = listOf(e.syn);
+  return `<article class="card">${num ? `<span class="num">${num}</span>` : ""}
+    <h3 class="word">${esc(e.w)}</h3>
+    ${e.pos ? `<div class="tags"><span class="tag pos">${esc(e.pos)}</span></div>` : ""}
+    <span class="lbl">Meaning</span><p class="meaning">${esc(e.m)}</p>
+    ${e.u ? `<span class="lbl">Usage</span><p class="usage">${hl(e.u, e.w)}</p>` : ""}
+    ${sy.length ? `<span class="lbl">Synonyms</span><div class="syns">${sy.map(x => `<button class="syn" type="button" data-syn="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
+    ${ot.length ? `<span class="lbl">Other meanings</span><ol class="olist">${ot.map(o => `<li>${o.p ? `<span class="op">${esc(o.p)}</span>` : ""}${esc(o.t)}</li>`).join("")}</ol>` : ""}
+    <div class="dicts"><a class="dict main" href="${oxfordUrl(e.w)}" target="_blank" rel="noopener">Oxford <small>↗</small></a><a class="dict main" href="${cambridgeUrl(e.w)}" target="_blank" rel="noopener">Cambridge <small>↗</small></a></div>
+  </article>`;
+}
+function openSheet(html) { $("#sheetBody").innerHTML = html; $("#sheet").hidden = false; $(".sheet-panel").scrollTop = 0; }
+function closeSheet() { $("#sheet").hidden = true; }
+function openWord(key, from) { if (LIST && LIST.map[key]) openSheet((from ? `<p class="sheet-from">${esc(from)}</p>` : "") + cardHTML(key)); }
+function openSyn(w) {
+  openSheet(`<p class="sheet-from">Look up this synonym in</p><p class="pick-word">${esc(w)}</p>
+    <div class="dicts"><a class="dict main" href="${oxfordUrl(w)}" target="_blank" rel="noopener">Oxford <small>↗</small></a><a class="dict main" href="${cambridgeUrl(w)}" target="_blank" rel="noopener">Cambridge <small>↗</small></a></div>
+    ${LIST.map[w.toLowerCase()] ? `<p style="margin-top:12px"><button class="linkbtn" type="button" data-open="${esc(w.toLowerCase())}">This word is also in your list: open its card</button></p>` : ""}`);
+}
+
+/* ---------- screens ---------- */
+const fmtDay = d => new Date(d + "T12:00:00").toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+function renderToday() {
+  if (!LIST) return; const keys = ensureToday();
+  $("#todaySub").textContent = fmtDay(today());
+  const s = streak(); $("#streak").hidden = s < 2; $("#streak").textContent = "🔥 " + s + "-day streak";
+  $("#todayCards").innerHTML = keys.map((k, i) => cardHTML(k, i + 1)).join("");
+}
+function renderHistory() {
+  if (!LIST) return;
+  const days = Object.keys(PROG?.days || {}).sort().reverse(), miss = Object.keys(MISS).filter(k => LIST.map[k]);
+  const td = today(), yd = ymd(new Date(Date.now() - 864e5));
+  let html = "";
+  if (miss.length) html += `<section class="day revise"><div class="day-title"><strong>Words to revise</strong><span lang="en">${miss.length} from your tests</span></div>
+    <div class="word-chips">${miss.map(k => `<button class="word-chip miss" type="button" data-open="${esc(k)}">${esc(LIST.map[k].w)}</button>`).join("")}</div>
+    <p class="note" style="margin:10px 0 0">A word leaves this list when you answer it correctly in a later test. <button class="linkbtn" type="button" data-goto="practice-miss">Practise these words</button></p></section>`;
+  html += days.length ? days.map(d => `<section class="day"><div class="day-title"><strong>${d === td ? "Today" : d === yd ? "Yesterday" : new Date(d + "T12:00:00").toLocaleDateString("en-IN", { weekday: "long" })}</strong><span lang="en">${new Date(d + "T12:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</span></div>
+    <div class="word-chips">${PROG.days[d].filter(k => LIST.map[k]).map(k => `<button class="word-chip${MISS[k] ? " miss" : ""}" type="button" data-open="${esc(k)}">${esc(LIST.map[k].w)}</button>`).join("")}</div></section>`).join("")
+    : `<p class="empty">No words yet.</p>`;
+  $("#historyList").innerHTML = html;
+}
+function renderAbout() {
+  if (!LIST) return;
+  const shown = learnedKeys().length, days = Object.keys(PROG?.days || {}).length, left = Math.max(0, LIST.all.length - new Set((PROG?.cycle || []).filter(k => LIST.map[k])).size);
+  const sc = SCORES; const avg = sc.length ? Math.round(sc.reduce((a, s) => a + s.c / s.n, 0) / sc.length * 100) : 0;
+  $("#aboutStats").innerHTML = `<div class="stat"><b>${shown.toLocaleString("en-IN")}</b><span>Words learnt</span></div><div class="stat"><b>${streak()}</b><span>Day streak</span></div><div class="stat"><b>${sc.length ? avg + "%" : "–"}</b><span>Test average</span></div>`;
+  $("#aboutProgress").innerHTML = `${days} day${days === 1 ? "" : "s"} of words on this phone. ${sc.length} test${sc.length === 1 ? "" : "s"} taken. The list has ${LIST.all.length.toLocaleString("en-IN")} words: ${left.toLocaleString("en-IN")} still to come (about ${Math.ceil(left / PER_DAY).toLocaleString("en-IN")} days).`;
+}
+
+/* ---------- tests: practice (whole list) and quiz (learnt words) ---------- */
+let SCORES = ls.get("ss_scores") || [], MISS = ls.get("ss_miss") || {};
+const saveScores = () => { ls.set("ss_scores", SCORES.slice(-200)); ls.set("ss_miss", MISS); };
+const MODES = { wm: "Word → meaning", mw: "Meaning → word", fb: "Fill in the blank" };
+const SETUP = { practice: { mode: "wm", n: 10 }, quiz: { mode: "wm", n: 10 } };
+let RUN = null;
+const normPos = p => (p || "").toLowerCase().slice(0, 3);
+function blankSentence(e) { const re = stemRe(e.w); if (!e.u || !re || !re.test(e.u)) return null; return esc(e.u).replace(re, '<span class="blank"></span>'); }
+function eligible(keys, mode) { return mode === "fb" ? keys.filter(k => blankSentence(LIST.map[k])) : keys; }
+function distractors(e, mode) {
+  const out = [], seen = new Set([e.key]), nm = s => s.toLowerCase().replace(/[^a-z]/g, "");
+  const same = LIST.all.filter(x => normPos(x.pos) === normPos(e.pos));
+  const pools = [same, LIST.all];
+  for (const pool of pools) {
+    let tries = 0;
+    while (out.length < 3 && tries++ < 200) {
+      const x = pool[Math.floor(Math.random() * pool.length)];
+      if (seen.has(x.key)) continue;
+      if (mode === "wm" && (nm(x.m) === nm(e.m) || x.m.toLowerCase().includes(e.key))) continue;
+      if (mode !== "wm" && (x.key.startsWith(e.key.slice(0, 5)) || e.key.startsWith(x.key.slice(0, 5)))) continue;
+      seen.add(x.key); out.push(x);
+    }
+  }
+  return out;
+}
+function makeQuestion(key, mode) {
+  const e = LIST.map[key]; const opts = shuffle([e, ...distractors(e, mode)]);
+  return { key, mode, opts: opts.map(o => o.key), ans: opts.indexOf(e), picked: -1 };
+}
+function startTest(kind, keys, opts = {}) {
+  const st = SETUP[kind], mode = opts.mode || st.mode;
+  let pool = eligible(keys, mode);
+  if (pool.length < 1) { toast(mode === "fb" ? "No usable sentences among these words yet. Try another type." : "No words to test yet."); return; }
+  const n = Math.min(opts.n || st.n, pool.length);
+  const qs = shuffle([...pool]).slice(0, n).map(k => makeQuestion(k, mode));
+  RUN = { kind, mode, qs, i: 0, c: 0, label: opts.label || (kind === "practice" ? "Practice" : "Quiz") };
+  if (kind === "quiz") showView("quiz"); else showView("practice");
+  renderQuestion();
+}
+const box = () => RUN.kind === "practice" ? $("#practiceBox") : $("#quizBox");
+function renderQuestion() {
+  const q = RUN.qs[RUN.i], e = LIST.map[q.key], N = RUN.qs.length;
+  let ask, prompt;
+  if (q.mode === "wm") { ask = "Choose the correct meaning"; prompt = `<div class="qword">${esc(e.w)}</div>${e.pos ? `<span class="tag pos">${esc(e.pos)}</span>` : ""}`; }
+  else if (q.mode === "mw") { ask = "Which word has this meaning?"; prompt = `<p class="qtext">${esc(e.m)}</p>${e.pos ? `<span class="tag pos">${esc(e.pos)}</span>` : ""}`; }
+  else { ask = "Choose the word that fits the blank"; prompt = `<p class="qtext">${blankSentence(e)}</p><p class="note" style="margin:4px 0 0">The word may appear in a different form in the sentence (for example, with -ed or -s).</p>`; }
+  const optText = k => q.mode === "wm" ? esc(LIST.map[k].m) : esc(LIST.map[k].w);
+  box().innerHTML = `<div class="qtop"><span>${esc(RUN.label)} · ${MODES[q.mode]}</span><span>Question ${RUN.i + 1} of ${N} · Score ${RUN.c}</span></div>
+    <div class="bar"><i style="width:${RUN.i / N * 100}%"></i></div>
+    <div class="qcard"><div class="qask">${ask}</div>${prompt}
+      <div class="opts">${q.opts.map((k, j) => `<button class="opt" type="button" data-opt="${j}"><b>${"ABCD"[j]}</b><span>${optText(k)}</span></button>`).join("")}</div>
+      <div id="fb"></div></div>
+    <div class="row-btns" style="margin-top:12px"><button class="btn ghost" type="button" data-quit="1">End test</button></div>`;
+  if (q.picked >= 0) showFeedback(false);
+}
+function answer(j) {
+  const q = RUN.qs[RUN.i]; if (q.picked >= 0) return; q.picked = j;
+  const ok = j === q.ans; if (ok) RUN.c++;
+  if (ok) delete MISS[q.key]; else MISS[q.key] = (MISS[q.key] || 0) + 1;
+  ls.set("ss_miss", MISS);
+  showFeedback(true);
+}
+function showFeedback(focus) {
+  const q = RUN.qs[RUN.i], j = q.picked, ok = j === q.ans, e = LIST.map[q.key];
+  box().querySelectorAll(".opt").forEach((b, k) => { b.disabled = true; if (k === q.ans) b.classList.add("right"); else if (k === j) b.classList.add("wrong"); });
+  const last = RUN.i === RUN.qs.length - 1;
+  $("#fb").innerHTML = `<div class="feedback ${ok ? "ok" : "no"}"><b class="v">${ok ? "Correct!" : "Not quite."}</b><b>${esc(e.w)}</b>${e.pos ? ` <i>(${esc(e.pos)})</i>` : ""}: ${esc(e.m)}
+      <div style="margin-top:6px"><button class="linkbtn" type="button" data-open="${esc(e.key)}">See the full word card</button></div></div>
+    <button class="btn full" type="button" data-next="1" style="margin-top:12px">${last ? "See my score" : "Next question"}</button>`;
+  box().querySelector(".bar i").style.width = ((RUN.i + 1) / RUN.qs.length * 100) + "%";
+  box().querySelector(".qtop span:last-child").textContent = `Question ${RUN.i + 1} of ${RUN.qs.length} · Score ${RUN.c}`;
+  if (focus) box().querySelector("[data-next]").focus({ preventScroll: true });
+}
+function nextQ() { if (RUN.i < RUN.qs.length - 1) { RUN.i++; renderQuestion(); window.scrollTo(0, 0); } else finish(); }
+function finish(early) {
+  const done = RUN.qs.filter(q => q.picked >= 0); const n = done.length;
+  if (!n) { const k = RUN.kind; RUN = null; renderSetup(k); return; }
+  SCORES.push({ t: Date.now(), kind: RUN.kind, mode: RUN.mode, n, c: RUN.c, label: RUN.label }); saveScores();
+  const pc = Math.round(RUN.c / n * 100), wrong = done.filter(q => q.picked !== q.ans);
+  const msg = pc === 100 ? "Perfect score! 🎉" : pc >= 80 ? "Excellent work!" : pc >= 60 ? "Good effort. Keep going!" : "Keep practising: revise the words below.";
+  const R = 52, C = 2 * Math.PI * R;
+  box().innerHTML = `<div class="panel result"><h3>${esc(RUN.label)} complete</h3>
+    <svg class="ring" viewBox="0 0 120 120"><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--line)" stroke-width="10"/><circle cx="60" cy="60" r="${R}" fill="none" stroke="var(--gold)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C * pc / 100} ${C}" transform="rotate(-90 60 60)"/><text x="60" y="68" text-anchor="middle" font-size="26" font-weight="800" fill="var(--heading)">${pc}%</text></svg>
+    <p class="big-score" style="font-size:1.6rem">${RUN.c} / ${n}</p><p>${msg}</p>${early ? `<p class="note">You ended the test after ${n} question${n === 1 ? "" : "s"}.</p>` : ""}</div>
+    ${wrong.length ? `<div class="panel"><h3>Words to revise</h3><p class="note">Tap a word to see its card. These words are also added to <i>Words to revise</i> in History.</p><div class="word-chips">${wrong.map(q => `<button class="word-chip miss" type="button" data-open="${esc(q.key)}">${esc(LIST.map[q.key].w)}</button>`).join("")}</div></div>` : ""}
+    <div class="row-btns"><button class="btn" type="button" data-again="1">Take another test</button></div>`;
+  const k = RUN.kind; RUN = { kind: k, finished: true };
+  window.scrollTo(0, 0);
+}
+function scoresHTML(kind) {
+  const sc = SCORES.filter(s => s.kind === kind);
+  if (!sc.length) return `<div class="panel"><h3>My scores</h3><p class="note">Your scores will appear here after your first test.</p></div>`;
+  const pcs = sc.map(s => Math.round(s.c / s.n * 100)), avg = Math.round(pcs.reduce((a, b) => a + b, 0) / pcs.length), best = Math.max(...pcs);
+  const recent = sc.slice(-20);
+  return `<div class="panel"><h3>My scores</h3>
+    <div class="stats"><div class="stat"><b>${sc.length}</b><span>Tests taken</span></div><div class="stat"><b>${avg}%</b><span>Average</span></div><div class="stat"><b>${best}%</b><span>Best</span></div></div>
+    <span class="lbl">Last ${recent.length} test${recent.length === 1 ? "" : "s"}</span>
+    <div class="spark" aria-hidden="true">${recent.map(s => `<i style="height:${Math.max(4, s.c / s.n * 100)}%" title="${Math.round(s.c / s.n * 100)}%"></i>`).join("")}</div>
+    <ul class="scores">${sc.slice(-10).reverse().map(s => `<li><span>${new Date(s.t).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · ${esc(s.label && s.label !== "Practice" && s.label !== "Quiz" ? s.label : MODES[s.mode])}</span><span class="pc">${s.c}/${s.n} · ${Math.round(s.c / s.n * 100)}%</span></li>`).join("")}</ul></div>`;
+}
+function renderSetup(kind) {
+  if (!LIST) return; const el = kind === "practice" ? $("#practiceBox") : $("#quizBox");
+  if (RUN && RUN.kind === kind && !RUN.finished) { renderQuestion(); return; }
+  const st = SETUP[kind], learnt = learnedKeys(), miss = Object.keys(MISS).filter(k => LIST.map[k]);
+  const avail = kind === "practice" ? LIST.all.length : learnt.length;
+  const ns = kind === "practice" ? [10, 20, 30, 50] : [5, 10, 20, 30];
+  if (!ns.includes(st.n)) st.n = 10;
+  const intro = kind === "practice"
+    ? `<p class="note">Each question has four options. Words come at random from all ${LIST.all.length.toLocaleString("en-IN")} words in the list.</p>`
+    : `<p class="note">You have learnt <b>${learnt.length}</b> word${learnt.length === 1 ? "" : "s"} so far. The quiz picks from these; wrong options may come from the whole list.</p>`;
+  el.innerHTML = `<div class="panel"><h3>${kind === "practice" ? "Start a practice test" : "Start a quiz"}</h3>${intro}
+      <span class="lbl">Type of question</span><div class="seg" data-set="mode">${Object.entries(MODES).map(([k, v]) => `<button type="button" data-val="${k}" aria-pressed="${st.mode === k}">${v}</button>`).join("")}</div>
+      <span class="lbl">Number of questions</span><div class="seg" data-set="n">${ns.map(n => `<button type="button" data-val="${n}" aria-pressed="${st.n === n}">${n}</button>`).join("")}</div>
+      <button class="btn full" type="button" data-start="${kind}" ${kind === "quiz" && learnt.length < 1 ? "disabled" : ""}>Start</button>
+      ${kind === "practice" && miss.length ? `<button class="btn ghost full" type="button" data-goto="practice-miss" style="margin-top:8px">Practise my ${miss.length} mistake${miss.length === 1 ? "" : "s"}</button>` : ""}
+    </div>${scoresHTML(kind)}`;
+}
+
+/* ---------- two-way search: by word, or by words in the meaning and synonyms ---------- */
+let SUG = [], SEL = -1;
+const hlq = (text, q) => { const t = String(text); const i = t.toLowerCase().indexOf(q); if (!q || i < 0) return esc(t);
+  return esc(t.slice(0, i)) + "<mark>" + esc(t.slice(i, i + q.length)) + "</mark>" + esc(t.slice(i + q.length)); };
+function searchWords(q) {
+  q = q.trim().toLowerCase(); if (!q || !LIST) return { words: [], meanings: [] };
+  const starts = [], inside = [], mean = [], wre = new RegExp("\\b" + reEsc(q), "i");
+  for (const e of LIST.all) {
+    if (e.key.startsWith(q)) starts.push(e);
+    else if (q.length >= 3 && e.key.includes(q)) inside.push(e);
+    else if (q.length >= 3 && (wre.test(e.m) || wre.test(e.syn))) mean.push(e);
+  }
+  starts.sort((a, b) => a.key.length - b.key.length || a.key.localeCompare(b.key));
+  mean.sort((a, b) => (wre.test(b.syn) - wre.test(a.syn)) || a.key.localeCompare(b.key));
+  return { words: [...starts, ...inside].slice(0, 8), meanings: mean.slice(0, 12) };
+}
+function snippet(e, q) {
+  const wre = new RegExp("\\b" + reEsc(q), "i");
+  if (wre.test(e.m)) return hlq(e.m, q);
+  const x = listOf(e.syn).find(y => wre.test(y)); return "Synonym: " + hlq(x || e.syn, q);
+}
+function renderSuggestions() {
+  const inp = $("#searchInput"), ul = $("#suggestions"), q = inp.value.trim().toLowerCase();
+  if (!q) { ul.hidden = true; inp.setAttribute("aria-expanded", "false"); SUG = []; return; }
+  const r = searchWords(q); SUG = [...r.words, ...r.meanings]; SEL = SUG.length ? 0 : -1;
+  let html = "", i = 0;
+  if (r.words.length) html += `<li class="s-head" role="presentation">Words</li>` + r.words.map(e => `<li role="option" id="sg${i}" data-i="${i++}"><span class="s-w">${hlq(e.w, q)}<small>${esc(e.pos)}</small></span><span class="s-sub">${esc(e.m)}</span></li>`).join("");
+  if (r.meanings.length) html += `<li class="s-head" role="presentation">Words with this in their meaning</li>` + r.meanings.map(e => `<li role="option" id="sg${i}" data-i="${i++}"><span class="s-w">${esc(e.w)}<small>${esc(e.pos)}</small></span><span class="s-sub">${snippet(e, q)}</span></li>`).join("");
+  if (!SUG.length) html = `<li class="s-none">No word or meaning matches “${esc(q)}”. Look it up in <a href="${oxfordUrl(q)}" target="_blank" rel="noopener">Oxford ↗</a> or <a href="${cambridgeUrl(q)}" target="_blank" rel="noopener">Cambridge ↗</a>.</li>`;
+  ul.innerHTML = html; ul.hidden = false; inp.setAttribute("aria-expanded", "true"); markSel();
+}
+function markSel() { document.querySelectorAll("#suggestions li[data-i]").forEach(li => li.setAttribute("aria-selected", String(+li.dataset.i === SEL)));
+  const cur = $("#sg" + SEL); if (cur) { cur.scrollIntoView({ block: "nearest" }); $("#searchInput").setAttribute("aria-activedescendant", "sg" + SEL); } }
+function pickSuggestion(i) {
+  const e = SUG[i]; if (!e) return;
+  $("#suggestions").hidden = true; $("#searchInput").setAttribute("aria-expanded", "false");
+  $("#searchInput").value = e.w; $("#searchResult").innerHTML = cardHTML(e.key); $("#searchHint").hidden = true; $("#searchInput").blur();
+}
+function renderSearchHint() {
+  if (!LIST || $("#searchResult").innerHTML) return; const h = $("#searchHint");
+  const ex = ["candid", "ubiquitous", "laconic", "ephemeral"].filter(w => LIST.map[w]), mx = ["angry", "praise", "secret", "lazy"].filter(w => searchWords(w).meanings.length);
+  h.hidden = false;
+  h.innerHTML = `Try a word: ${ex.map(w => `<button class="chip-btn" type="button" data-q="${w}">${w}</button>`).join(" ")}<br>Or a meaning: ${mx.map(w => `<button class="chip-btn" type="button" data-q="${w}">${w}</button>`).join(" ")}`;
+}
+$("#searchInput").addEventListener("input", () => { $("#searchResult").innerHTML = ""; renderSuggestions(); if (!$("#searchInput").value.trim()) renderSearchHint(); else $("#searchHint").hidden = true; });
+$("#searchInput").addEventListener("keydown", e => {
+  if ($("#suggestions").hidden || !SUG.length) return;
+  if (e.key === "ArrowDown") { SEL = (SEL + 1) % SUG.length; markSel(); e.preventDefault(); }
+  else if (e.key === "ArrowUp") { SEL = (SEL - 1 + SUG.length) % SUG.length; markSel(); e.preventDefault(); }
+  else if (e.key === "Enter") { pickSuggestion(Math.max(0, SEL)); e.preventDefault(); }
+  else if (e.key === "Escape") $("#suggestions").hidden = true;
+});
+$("#suggestions").addEventListener("click", e => { const li = e.target.closest("li[data-i]"); if (li) pickSuggestion(+li.dataset.i); });
+document.addEventListener("click", e => { if (!e.target.closest(".search-wrap")) $("#suggestions").hidden = true;
+  const c = e.target.closest("[data-q]"); if (c) { $("#searchInput").value = c.dataset.q; $("#searchResult").innerHTML = ""; renderSuggestions(); $("#searchHint").hidden = true; $("#searchInput").focus(); } });
+
+/* ---------- shared theme and control panel ----------
+   The look of the app comes from theme.css. On the published claude.ai page, a theme saved from the
+   control panel is stored with the page and shown to everyone; on GitHub, the control panel gives the
+   theme.css text to paste into the repository. Open the control panel by adding #control-panel to the
+   app's address. */
+let DBP = null;
+function getDb() {
+  if (!DBP) DBP = (window.claude && typeof window.claude.use === "function")
+    ? Promise.race([Promise.resolve(window.claude.use("db")).catch(() => null), new Promise(r => setTimeout(() => r(null), 10000))])
+    : Promise.resolve(null);
+  return DBP;
+}
+const docData = v => !v ? null : (typeof v.data === "function" ? v.data() : (v.data && typeof v.data === "object" ? v.data : v));
+async function readSharedTheme() {
+  const db = await getDb(); if (!db) return null;
+  try { const d = docData(await db.doc("settings/theme").get()); return d && d.css ? d : null; } catch (e) { return null; }
+}
+function applySharedTheme(css) {
+  let st = document.getElementById("sharedTheme");
+  if (!st) { st = document.createElement("style"); st.id = "sharedTheme"; document.head.appendChild(st); }
+  st.textContent = css || "";
+  const m = /--brick:\s*(#[0-9a-f]{6})/i.exec(css || ""); const tc = document.querySelector('meta[name="theme-color"]'); if (m && tc) tc.content = m[1];
+}
+readSharedTheme().then(d => { if (d) applySharedTheme(d.css); });
+
+const CP_COLORS = [
+  ["Top bar, opening screen and main buttons", [["brick", "Top bar and main buttons", "Also Start, Oxford, Cambridge, opening screen"], ["brick-2", "Top bar second colour", "Gradient end of top bar and opening screen"], ["on-brick", "Text on top bar and buttons", ""], ["splash-accent", "Opening screen highlight", "\"Learn and Test\""], ["logo-bg", "Logo background", ""]]],
+  ["Headings and accent", [["heading", "Headings and words", "Screen headings, words on cards, open tab"], ["gold", "Accent", "Card top line, numbers, progress bar, score ring"]]],
+  ["Background, cards, left strip and text", [["sand", "Page background", ""], ["paper", "Cards", "Word cards, panels, answer options"], ["surface", "Left strip and light buttons", ""], ["ink", "Main text", ""], ["muted", "Secondary text", "Dates, labels, notes"], ["line", "Borders", ""]]],
+  ["Tags, word buttons and highlights", [["chip", "Tag background", "Part of speech, streak"], ["tag-ink", "Tag text", ""], ["wordchip", "Word buttons", "History words and synonyms"], ["hover", "Hover and selected", ""], ["mark", "Word highlight in usage", ""]]],
+  ["Right and wrong answers", [["ok", "Right answer", ""], ["ok-bg", "Right answer background", ""], ["bad", "Wrong answer", ""], ["bad-bg", "Wrong answer background", ""]]],
+  ["Disclaimer and words to revise", [["warn-bg", "Background", ""], ["warn-line", "Border", ""], ["note-ink", "Disclaimer text", ""]]],
+];
+const CP_DARK = [["sand", "Page background"], ["paper", "Cards"], ["surface", "Left strip and light buttons"], ["wordchip", "Word buttons"], ["ink", "Main text"], ["muted", "Secondary text"], ["line", "Borders"],
+  ["heading", "Headings and words"], ["chip", "Tag background"], ["tag-ink", "Tag text"], ["hover", "Hover and selected"], ["mark", "Word highlight"], ["ok", "Right answer"], ["ok-bg", "Right answer background"],
+  ["bad", "Wrong answer"], ["bad-bg", "Wrong answer background"], ["warn-bg", "Disclaimer background"], ["warn-line", "Disclaimer border"], ["note-ink", "Disclaimer text"]];
+const CP_DEVICE = 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+const CP_FONTS = { device: ["Phone's own font", null, "sans-serif"], Mukta: ["Mukta", "400;600;700", "sans-serif"], Inter: ["Inter", "400;600;700", "sans-serif"], Roboto: ["Roboto", "400;500;700", "sans-serif"],
+  "Open Sans": ["Open Sans", "400;600;700", "sans-serif"], Lato: ["Lato", "400;700", "sans-serif"], Poppins: ["Poppins", "400;600;700", "sans-serif"], Nunito: ["Nunito", "400;600;700", "sans-serif"],
+  "Source Sans 3": ["Source Sans 3", "400;600;700", "sans-serif"], Montserrat: ["Montserrat", "400;600;700", "sans-serif"], "Noto Sans": ["Noto Sans", "400;600;700", "sans-serif"], "Work Sans": ["Work Sans", "400;600;700", "sans-serif"],
+  Merriweather: ["Merriweather (serif)", "400;700", "serif"], Lora: ["Lora (serif)", "400;600;700", "serif"], "Noto Serif": ["Noto Serif (serif)", "400;600;700", "serif"], "Playfair Display": ["Playfair Display (serif)", "400;600;700", "serif"],
+  Fraunces: ["Fraunces (serif)", "400;600;700", "serif"], "Libre Baskerville": ["Libre Baskerville (serif)", "400;700", "serif"] };
+const CP_DEFAULT = { head: "Mukta", text: "device", size: 105, word: 1.75, radius: 18, rail: 50, darkOn: true,
+  c: { brick: "#1f3a68", "brick-2": "#2f5597", "on-brick": "#ffffff", "splash-accent": "#ffd36b", "logo-bg": "#ffffff", heading: "#1f3a68", gold: "#6ca2ea", sand: "#eef2f8", paper: "#ffffff", surface: "#b6f7fb",
+    ink: "#1b2433", muted: "#5d6b82", line: "#d6deea", chip: "#e3eaf5", "tag-ink": "#2a3f66", wordchip: "#eef2f8", hover: "#eaf0fa", mark: "#f0e8d1", ok: "#2f7d4a", "ok-bg": "#e6f3ea", bad: "#b0352b", "bad-bg": "#fbe8e5",
+    "warn-bg": "#fff8e6", "warn-line": "#f0d79a", "note-ink": "#0c1118" },
+  d: { sand: "#0f141c", paper: "#18202c", surface: "#18202c", wordchip: "#1d2734", ink: "#e6ebf2", muted: "#9aa7b8", line: "#2b3645", heading: "#9ec1ff", chip: "#22304a", "tag-ink": "#c6d6f2", hover: "#22304a",
+    mark: "#5a4a17", ok: "#7fd39b", "ok-bg": "#1d2e22", bad: "#f19a8f", "bad-bg": "#3a201c", "warn-bg": "#211d14", "warn-line": "#54451f", "note-ink": "#d6cbb0" } };
+const CP_PRESETS = [
+  ["Navy", {}, {}],
+  ["Brick", { brick: "#5b2a12", "brick-2": "#8a4520", heading: "#5b2a12", gold: "#c08a2d", sand: "#f6efe3", paper: "#fffdf8", surface: "#ffffff", ink: "#2a211b", muted: "#7a6a5c", line: "#e6dccb", chip: "#f1e6d3", "tag-ink": "#6b4a2a", wordchip: "#f6efe3", hover: "#fbf3e4", mark: "#f7e1b0", "warn-bg": "#fff6e5", "warn-line": "#ecd3a3", "note-ink": "#5d4a35" },
+    { sand: "#17120e", paper: "#221b15", surface: "#221b15", wordchip: "#2a2119", ink: "#f1e8dc", muted: "#b3a493", line: "#3a2f25", heading: "#f0b98f", chip: "#33281e", "tag-ink": "#e7cfae", hover: "#33281e", mark: "#6a4b1c", "warn-bg": "#2a2016", "warn-line": "#5c4526", "note-ink": "#d9c7ad" }],
+  ["Forest", { brick: "#1e5b3a", "brick-2": "#2e7d4f", heading: "#1e5b3a", gold: "#c9a227", sand: "#eef5ef", paper: "#ffffff", surface: "#d9f0df", ink: "#1d2b22", muted: "#5f7366", line: "#d5e5d9", chip: "#e1efe4", "tag-ink": "#24563a", wordchip: "#eef5ef", hover: "#e8f4eb", mark: "#f6e7a8", "warn-bg": "#fff8e6", "warn-line": "#ecd9a0", "note-ink": "#4e5e53" },
+    { sand: "#0f1712", paper: "#17221b", surface: "#17221b", wordchip: "#1c2a21", line: "#2a3a30", ink: "#e5efe8", muted: "#9db3a4", heading: "#8fd4a8", chip: "#21352a", "tag-ink": "#bfe3cb", hover: "#21352a", mark: "#55491a", "warn-bg": "#201d13", "warn-line": "#51461f", "note-ink": "#d3caa9" }],
+  ["Saffron", { brick: "#a84300", "brick-2": "#df6d0c", heading: "#a84300", gold: "#138808", sand: "#fff6ee", paper: "#fffdf9", surface: "#ffe7cf", ink: "#2b1d12", muted: "#7d6655", line: "#f0dcc8", chip: "#fde8d3", "tag-ink": "#8a3c06", wordchip: "#fff6ee", hover: "#fff0e0", mark: "#ffd9a8", "warn-bg": "#f2f9f0", "warn-line": "#bfe0b8", "note-ink": "#4a5a46", "splash-accent": "#ffffff" },
+    { sand: "#1a120b", paper: "#251a11", surface: "#251a11", wordchip: "#2c1f14", line: "#3e2c1d", ink: "#f4e9de", muted: "#bba693", heading: "#ffb36b", chip: "#3a2716", "tag-ink": "#f5cfa8", hover: "#3a2716", mark: "#6b4413", "warn-bg": "#16200f", "warn-line": "#2f4a25", "note-ink": "#c9dcc1" }],
+  ["Plum", { brick: "#4a2c6b", "brick-2": "#6f4a9a", heading: "#4a2c6b", gold: "#c8913a", sand: "#f5f1f8", paper: "#ffffff", surface: "#ece4f4", ink: "#251c2e", muted: "#6e6280", line: "#e3dbec", chip: "#ece4f4", "tag-ink": "#4a2c6b", wordchip: "#f5f1f8", hover: "#f1eaf8", mark: "#f5e2b0", "warn-bg": "#fff7e8", "warn-line": "#ecd5a6", "note-ink": "#5c4e6a" },
+    { sand: "#15111a", paper: "#1f1926", surface: "#1f1926", wordchip: "#251e2e", line: "#352c40", ink: "#ece6f2", muted: "#aa9fb8", heading: "#c9a8f0", chip: "#2e2440", "tag-ink": "#dccbf2", hover: "#2e2440", mark: "#5e4a1d", "warn-bg": "#211c13", "warn-line": "#53451f", "note-ink": "#d8ccb0" }],
+  ["Slate", { brick: "#2f3b48", "brick-2": "#4b5d70", heading: "#24303c", gold: "#0f8b8d", sand: "#f2f4f6", paper: "#ffffff", surface: "#e6ebef", ink: "#1f262d", muted: "#64707d", line: "#dce1e6", chip: "#e6ebef", "tag-ink": "#34414e", wordchip: "#f2f4f6", hover: "#edf1f4", mark: "#c9eeee", "warn-bg": "#f3f8f8", "warn-line": "#bfdede", "note-ink": "#4f5b66" },
+    { sand: "#111418", paper: "#1a1f25", surface: "#1a1f25", wordchip: "#1f252c", line: "#2e353e", ink: "#e8ecf0", muted: "#9ba6b2", heading: "#9fd6d7", chip: "#26303a", "tag-ink": "#c8d3dd", hover: "#26303a", mark: "#1d4a4b", "warn-bg": "#152021", "warn-line": "#25494a", "note-ink": "#bcd2d2" }],
+];
+/* Every part of the screens that can be changed on its own: [id, name, CSS selector, screen group, has a top line]. More specific parts come first. */
+const CP_PARTS = [
+  ["splash", "Opening screen background", ".splash", "Opening screen"], ["splashTitle", "Opening screen title", ".splash h1", "Opening screen"],
+  ["splashEm", "Opening screen highlight (Learn and Test)", ".splash h1 em", "Opening screen"], ["splashTl", "Opening screen tagline", ".splash .tl", "Opening screen"],
+  ["splashDev", "\"This app is developed by\"", ".splash .dev", "Opening screen"], ["splashName", "Developer's name", ".splash .devn", "Opening screen"], ["splashBtn", "Start learning button", ".splash .btn", "Opening screen"],
+  ["bar", "Top bar", ".app-bar", "Top bar and left strip"], ["title", "App title", ".app-names h1", "Top bar and left strip"], ["subtitle", "Top bar subtitle", ".app-names p", "Top bar and left strip"],
+  ["logo", "Logo square", ".app-logo", "Top bar and left strip"], ["aboutBtn", "About (ℹ️) button", ".about-btn", "Top bar and left strip"],
+  ["strip", "Left strip", ".tab-bar", "Top bar and left strip"], ["tabOn", "Open tab in the strip", ".tab-bar button.active", "Top bar and left strip"], ["tab", "Tabs in the strip", ".tab-bar button", "Top bar and left strip"],
+  ["page", "Page background", "body", "Every screen"], ["heading", "Screen headings", ".day-head h2", "Every screen"], ["dateLine", "Line under the heading", ".date-line", "Every screen"],
+  ["streak", "Day-streak label", ".streak", "Today"], ["card", "Word cards", ".card", "Today and word card", 1], ["cardNum", "Word number on cards", ".card .num", "Today and word card"],
+  ["word", "Word on cards", ".card .word", "Today and word card"], ["pos", "Part-of-speech tag", ".tag.pos", "Today and word card"], ["lbl", "Labels (MEANING, USAGE …)", ".lbl", "Today and word card"],
+  ["meaning", "Meaning", ".meaning", "Today and word card"], ["usage", "Usage sentence", ".usage", "Today and word card"], ["usageMark", "Highlighted word in usage", ".usage mark", "Today and word card"],
+  ["syn", "Synonym buttons", ".syn", "Today and word card"], ["olist", "Other meanings", ".olist", "Today and word card"], ["dict", "Oxford and Cambridge buttons", ".dict.main", "Today and word card"],
+  ["sheet", "Pop-up behind the word card", ".sheet-panel", "Today and word card"],
+  ["revise", "Words-to-revise box", ".day.revise", "History", 1], ["dayBox", "Day boxes", ".day", "History"], ["dayTitle", "Day names (Today, Yesterday …)", ".day-title strong", "History"],
+  ["dayDate", "Dates in day boxes", ".day-title span", "History"], ["chipMiss", "Words-to-revise buttons", ".word-chip.miss", "History"], ["chip", "Word buttons", ".word-chip", "History"],
+  ["link", "Links (Practise these words …)", ".linkbtn", "History"],
+  ["panelH", "Panel headings", ".panel h3", "Tests and About"], ["panel", "Panels", ".panel", "Tests and About"], ["note", "Notes and small text", ".note", "Tests and About"],
+  ["segOn", "Chosen option buttons", ".seg button[aria-pressed=\"true\"]", "Tests and About"], ["seg", "Option buttons (type, number)", ".seg button", "Tests and About"],
+  ["btnGhost", "Light buttons", ".btn.ghost", "Tests and About"], ["btn", "Main buttons (Start, Next …)", ".btn", "Tests and About"],
+  ["statNum", "Score numbers", ".stat b", "Tests and About"], ["stat", "Score boxes", ".stat", "Tests and About"], ["qtop", "Question count line", ".qtop", "Tests and About"],
+  ["qask", "Question instruction", ".qask", "Tests and About"], ["qword", "Word in a question", ".qword", "Tests and About"], ["qtext", "Question sentence or meaning", ".qtext", "Tests and About"],
+  ["qcard", "Question card", ".qcard", "Tests and About", 1], ["optRight", "Right answer", ".opt.right", "Tests and About"], ["optWrong", "Wrong answer", ".opt.wrong", "Tests and About"],
+  ["optLetter", "Option letters (A B C D)", ".opt b", "Tests and About"], ["opt", "Answer options", ".opt", "Tests and About"], ["feedback", "Answer explanation box", ".feedback", "Tests and About"],
+  ["bigScore", "Score (3 / 5)", ".big-score", "Tests and About"], ["discH", "Disclaimer heading", ".disclaimer h3", "Tests and About"], ["disc", "Disclaimer", ".disclaimer", "Tests and About"],
+  ["credit", "\"Developed by\" line", ".credit", "Tests and About"],
+  ["searchBox", "Search box", "#searchInput", "Search"], ["sugList", "Suggestion list", ".suggestions", "Search"], ["sugHead", "Suggestion group titles", ".suggestions .s-head", "Search"],
+  ["sugWord", "Suggested words", ".suggestions .s-w", "Search"], ["sugSub", "Suggested meanings", ".suggestions .s-sub", "Search"], ["sugMark", "Matched letters", ".suggestions mark", "Search"],
+  ["hint", "Example text", ".hint", "Search"], ["chipBtn", "Example buttons", ".chip-btn", "Search"],
+];
+const CP_PROPS = [["bg", "Background colour", "color"], ["color", "Text colour", "color"], ["border", "Border colour", "color"], ["top", "Top line colour", "color"],
+  ["font", "Font", "font"], ["size", "Text size", "size"], ["weight", "Thickness", "weight"], ["italic", "Slant", "italic"], ["radius", "Corner roundness", "radius"]];
+const CP_PART = Object.fromEntries(CP_PARTS.map(p => [p[0], p]));
+function cpPartRules() {
+  const out = [];
+  for (const [id, pr] of Object.entries(CPS.parts || {})) {
+    const p = CP_PART[id]; if (!p || !pr) continue; const L = [];
+    if (pr.bg) L.push(`background: ${pr.bg} !important;`); if (pr.color) L.push(`color: ${pr.color} !important;`);
+    if (pr.border) L.push(`border-color: ${pr.border} !important;`); if (pr.top) L.push(`border-top-color: ${pr.top} !important;`);
+    if (pr.font) L.push(`font-family: ${cpStack(pr.font)} !important;`); if (pr.size) L.push(`font-size: ${pr.size}rem !important;`);
+    if (pr.weight) L.push(`font-weight: ${pr.weight} !important;`); if (pr.italic) L.push(`font-style: ${pr.italic} !important;`);
+    if (pr.radius !== undefined && pr.radius !== "") L.push(`border-radius: ${pr.radius}px !important;`);
+    if (L.length) out.push(`/* ${p[1]} */\n${p[2]} { ${L.join(" ")} }`);
+  }
+  return out.join("\n");
+}
+const cpClone = o => JSON.parse(JSON.stringify(o));
+let CPS = null, CP_DARKPV = false, CP_FRAMES = [], CP_BASE = "", CP_FILE = "", CP_SNAPS = null, CP_BUILT = false;
+const cpStack = k => k === "device" || !CP_FONTS[k] ? CP_DEVICE : `"${k}", ${CP_DEVICE.replace(/, sans-serif$/, "")}, ${CP_FONTS[k][2]}`;
+function cpFontImport() {
+  const fam = [];
+  [CPS.head, CPS.text, ...Object.values(CPS.parts || {}).map(p => p && p.font).filter(Boolean)].forEach(k => { if (k === "device" || !CP_FONTS[k]) return; const part = "family=" + k.replace(/ /g, "+") + (CP_FONTS[k][1] ? ":wght@" + CP_FONTS[k][1] : ""); if (!fam.includes(part)) fam.push(part); });
+  return fam.length ? "https://fonts.googleapis.com/css2?" + fam.join("&") + "&display=swap" : "";
+}
+function cpRoot() {
+  const L = Object.entries(CPS.c).map(([k, v]) => `  --${k}: ${v};`);
+  L.push(`  --hi: ${cpStack(CPS.head)};`, `  --en: ${cpStack(CPS.text)};`, `  --text-size: ${CPS.size}%;`, `  --word-size: ${CPS.word}rem;`, `  --radius: ${CPS.radius}px;`, `  --railw: ${CPS.rail}px;`);
+  return ":root {\n" + L.join("\n") + "\n}";
+}
+const cpDarkVars = () => Object.entries(CPS.d).map(([k, v]) => `--${k}: ${v};`).join(" ") + " color-scheme: dark;";
+const cpLightVars = () => Object.entries(CPS.c).map(([k, v]) => `--${k}: ${v};`).join(" ") + " color-scheme: light;";
+function cpExport() {
+  const imp = cpFontImport();
+  return "/* Vocabulary: Learn and Test — app theme (made with the control panel) */\n" + (imp ? `@import url("${imp}");\n` : "") + cpRoot() + "\n" +
+    `@media (prefers-color-scheme: dark) {\n  :root { ${CPS.darkOn ? cpDarkVars() : cpLightVars()} }\n}\n` + (cpPartRules() ? "/* Parts changed one by one */\n" + cpPartRules() + "\n" : "");
+}
+const cpPreviewTheme = () => cpRoot() + `\n:root { ${CP_DARKPV && CPS.darkOn ? cpDarkVars() : cpLightVars()} }\n` + cpPartRules() + "\n.cp-sel { outline: 3px dashed #ff2d55 !important; outline-offset: 2px !important; }";
+const CP_SCREENS = [["splash", "Opening screen"], ["today", "Today"], ["history", "History"], ["sheet", "Word card"], ["practice", "Practice Test"], ["question", "A test question"], ["result", "Quiz result"], ["search", "Search"], ["about", "About"]];
+function cpFrameDoc(key) {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link id="font" rel="stylesheet" href="${cpFontImport()}"><style>${CP_BASE}</style><style>${CP_FILE}</style><style id="theme">${cpPreviewTheme()}</style></head>
+<body>${CP_SNAPS[key] || ""}<script>document.addEventListener("click",e=>{if(e.target.closest("a,button"))e.preventDefault()},true)<\/script></body></html>`;
+}
+let cpPending;
+function cpRefresh() {
+  clearTimeout(cpPending);
+  cpPending = setTimeout(() => {
+    const css = cpPreviewTheme(), href = cpFontImport();
+    CP_FRAMES.forEach(([ifr, key]) => {
+      let doc = null; try { doc = ifr.contentDocument; } catch (e) {}
+      const st = doc && doc.getElementById("theme");
+      if (st) { st.textContent = css; const l = doc.getElementById("font"); if (l && l.getAttribute("href") !== href) l.setAttribute("href", href); }
+      else ifr.srcdoc = cpFrameDoc(key);
+    });
+    $("#cpCss").value = cpExport();
+  }, 60);
+}
+const cpSync = [];
+function cpColorRow(id, label, hint, get, set) {
+  const row = document.createElement("div"); row.className = "cp-row";
+  row.innerHTML = `<label for="${id}t">${esc(label)}${hint ? `<small>${esc(hint)}</small>` : ""}</label><input type="color" aria-label="${esc(label)}"><input type="text" id="${id}t" maxlength="7" spellcheck="false">`;
+  const p = row.querySelector("[type=color]"), t = row.querySelector("[type=text]");
+  cpSync.push(() => { p.value = get(); t.value = get(); t.classList.remove("bad"); });
+  p.addEventListener("input", () => { set(p.value); t.value = p.value; t.classList.remove("bad"); cpRefresh(); });
+  t.addEventListener("input", () => { const v = t.value.trim(); if (/^#[0-9a-f]{6}$/i.test(v)) { set(v.toLowerCase()); p.value = v; t.classList.remove("bad"); cpRefresh(); } else t.classList.add("bad"); });
+  return row;
+}
+const cpSyncAll = () => cpSync.forEach(f => f());
+function cpStatus(msg, cls) { const s = $("#cpStatus"); s.textContent = msg; s.className = "cp-status" + (cls ? " " + cls : ""); }
+let CP_SELPART = "";
+function cpPartOf(el) {
+  for (let n = el; n && n.nodeType === 1; n = n.parentElement) { const p = CP_PARTS.find(p => { try { return n.matches(p[2]); } catch (e) { return false; } }); if (p) return p[0]; }
+  return "";
+}
+function cpMark() {
+  CP_FRAMES.forEach(([ifr]) => { const doc = ifr.contentDocument; if (!doc) return;
+    doc.querySelectorAll(".cp-sel").forEach(n => n.classList.remove("cp-sel"));
+    if (CP_SELPART) try { doc.querySelectorAll(CP_PART[CP_SELPART][2]).forEach(n => { if (cpPartOf(n) === CP_SELPART) n.classList.add("cp-sel"); }); } catch (e) {} });
+}
+function cpCurrent(prop) {
+  for (const [ifr] of CP_FRAMES) { const doc = ifr.contentDocument; if (!doc) continue;
+    const n = [...doc.querySelectorAll(CP_PART[CP_SELPART][2])].find(x => cpPartOf(x) === CP_SELPART); if (!n) continue;
+    const cs = ifr.contentWindow.getComputedStyle(n);
+    const hex = v => { const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/.exec(v); if (!m || m[4] === "0") return null; return "#" + [m[1], m[2], m[3]].map(x => (+x).toString(16).padStart(2, "0")).join(""); };
+    if (prop === "bg") return hex(cs.backgroundColor) || (/gradient/.test(cs.backgroundImage) ? hex((/rgba?\([^)]*\)/.exec(cs.backgroundImage) || [""])[0]) : null) || "#ffffff";
+    if (prop === "color") return hex(cs.color) || "#000000";
+    if (prop === "border") return hex(cs.borderBottomColor) || hex(cs.borderLeftColor) || "#cccccc";
+    if (prop === "top") return hex(cs.borderTopColor) || "#cccccc";
+    if (prop === "size") return (parseFloat(cs.fontSize) / parseFloat(ifr.contentWindow.getComputedStyle(doc.documentElement).fontSize)).toFixed(2);
+    if (prop === "radius") return parseFloat(cs.borderTopLeftRadius) || 0;
+  }
+  return null;
+}
+function cpChangedList() {
+  const ids = Object.keys(CPS.parts || {}).filter(id => CP_PART[id] && Object.keys(CPS.parts[id]).length);
+  $("#cpChanged").innerHTML = ids.length ? "Changed so far: " + ids.map(id => `<a href="#" data-cppart="${id}">${esc(CP_PART[id][1])}</a>`).join(", ") : "";
+  $("#cpChanged").querySelectorAll("[data-cppart]").forEach(a => a.onclick = e => { e.preventDefault(); cpSelect(a.dataset.cppart); });
+}
+function cpSelect(id) {
+  CP_SELPART = id || ""; $("#cpPartSel").value = CP_SELPART; cpMark(); cpChangedList();
+  const f = $("#cpPartForm"); if (!CP_SELPART) { f.innerHTML = ""; return; }
+  $("#cpPartBox").open = true;
+  CPS.parts = CPS.parts || {}; const pr = CPS.parts[CP_SELPART] || {}; const part = CP_PART[CP_SELPART];
+  const set = (k, v) => { const o = CPS.parts[CP_SELPART] = Object.assign({}, CPS.parts[CP_SELPART]); if (v === undefined || v === "") delete o[k]; else o[k] = v; if (!Object.keys(o).length) delete CPS.parts[CP_SELPART]; cpRefresh(); cpChangedList(); };
+  const props = CP_PROPS.filter(([k]) => k !== "top" || part[4]);
+  f.innerHTML = `<p style="margin:8px 0 2px;font-weight:700">${esc(part[1])}</p>` + props.map(([k, l, t]) => {
+    const has = pr[k] !== undefined && pr[k] !== "";
+    let ctl;
+    if (t === "color") ctl = `<input type="color" data-k="${k}" value="${pr[k] || cpCurrent(k) || "#000000"}">`;
+    else if (t === "font") ctl = `<select data-k="${k}"><option value="">Unchanged</option>${Object.entries(CP_FONTS).map(([fk, fv]) => `<option value="${esc(fk)}"${pr[k] === fk ? " selected" : ""}>${esc(fv[0])}</option>`).join("")}</select>`;
+    else if (t === "weight") ctl = `<select data-k="${k}"><option value="">Unchanged</option>${[["400", "Normal"], ["600", "Semi-bold"], ["700", "Bold"], ["800", "Extra bold"]].map(([v, n]) => `<option value="${v}"${pr[k] === v ? " selected" : ""}>${n}</option>`).join("")}</select>`;
+    else if (t === "italic") ctl = `<select data-k="${k}"><option value="">Unchanged</option><option value="normal"${pr[k] === "normal" ? " selected" : ""}>Upright</option><option value="italic"${pr[k] === "italic" ? " selected" : ""}>Italic</option></select>`;
+    else if (t === "size") { const v = pr[k] || cpCurrent("size") || 1; ctl = `<span class="cp-range"><input type="range" data-k="${k}" min="0.6" max="3.2" step="0.05" value="${v}"><output>${(+v).toFixed(2)}</output></span>`; }
+    else { const v = has ? pr[k] : (cpCurrent("radius") || 0); ctl = `<span class="cp-range"><input type="range" data-k="${k}" min="0" max="40" step="1" value="${v}"><output>${v}px</output></span>`; }
+    return `<div class="cp-prow"><label>${esc(l)}${has ? "" : `<small>unchanged</small>`}</label>${ctl}<button type="button" class="cp-x" data-clear="${k}" title="Back to unchanged" ${has ? "" : "disabled"}>✕</button></div>`;
+  }).join("") + `<div class="cp-actions"><button type="button" class="cp-btn ghost" id="cpPartReset">Undo all changes to this part</button></div>`;
+  f.querySelectorAll("[data-k]").forEach(inp => inp.addEventListener("input", () => {
+    const k = inp.dataset.k; let v = inp.value;
+    if (inp.type === "range") { inp.nextElementSibling.textContent = k === "radius" ? v + "px" : (+v).toFixed(2); v = k === "radius" ? +v : (+v).toFixed(2); }
+    set(k, v); const row = inp.closest(".cp-prow"); row.querySelector("small") && row.querySelector("small").remove(); row.querySelector(".cp-x").disabled = !(CPS.parts[CP_SELPART] && CPS.parts[CP_SELPART][k] !== undefined);
+  }));
+  f.querySelectorAll("[data-clear]").forEach(b => b.onclick = () => { set(b.dataset.clear, undefined); cpSelect(CP_SELPART); });
+  $("#cpPartReset").onclick = () => { delete CPS.parts[CP_SELPART]; cpRefresh(); cpSelect(CP_SELPART); };
+}
+async function buildControlPanel() {
+  const box = $("#cp");
+  box.innerHTML = `<aside><h1>Control panel</h1><p class="cp-lead">Change the colours, fonts and sizes of every screen. The screens on the right update as you go. Press <b>Save for everyone</b> when you are happy.</p>
+    <div class="cp-actions"><button class="cp-btn" type="button" id="cpSave">Save for everyone</button><button class="cp-btn ghost" type="button" id="cpClose">Close</button></div>
+    <p class="cp-status" id="cpStatus" role="status"></p>
+    <details open id="cpPartBox"><summary>Change one part</summary>
+      <p class="cp-note" style="margin:6px 0">Tap anything in the screens on the right (a tab, the strip, a heading, a button, any text), or pick it from this list. Then change it below. The chosen part is outlined in red.</p>
+      <select id="cpPartSel" aria-label="Part to change"><option value="">Choose a part…</option>${[...new Set(CP_PARTS.map(p => p[3]))].map(g => `<optgroup label="${esc(g)}">${CP_PARTS.filter(p => p[3] === g).map(p => `<option value="${p[0]}">${esc(p[1])}</option>`).join("")}</optgroup>`).join("")}</select>
+      <div id="cpPartForm" class="cp-rows"></div>
+      <div id="cpChanged" class="cp-note" style="margin-top:8px"></div>
+    </details>
+    <details><summary>Ready-made themes</summary><div class="cp-presets" id="cpPresets"></div></details>
+    <p class="cp-note" style="margin:12px 0 0;font-weight:600">Colours used everywhere</p>${CP_COLORS.map(([g], i) => `<details><summary>${esc(g)}</summary><div class="cp-rows" id="cpG${i}"></div></details>`).join("")}
+    <details><summary>Fonts and sizes everywhere</summary><div class="cp-rows">
+      <div class="cp-field"><label for="cpHead">Heading font<small>Title bar, screen headings, left strip, history dates</small></label><select id="cpHead"></select></div>
+      <div class="cp-field"><label for="cpText">Text font<small>Word cards, meanings, tests, buttons</small></label><select id="cpText"></select></div>
+      <div class="cp-field"><label for="cpSize">Overall text size</label><div class="cp-range"><input type="range" id="cpSize" min="85" max="130" step="5"><output></output></div></div>
+      <div class="cp-field"><label for="cpWord">Word size on cards</label><div class="cp-range"><input type="range" id="cpWord" min="1.3" max="2.6" step="0.05"><output></output></div></div>
+      <div class="cp-field"><label for="cpRad">Corner roundness</label><div class="cp-range"><input type="range" id="cpRad" min="0" max="26" step="1"><output></output></div></div>
+      <div class="cp-field"><label for="cpRail">Left strip width</label><div class="cp-range"><input type="range" id="cpRail" min="44" max="72" step="1"><output></output></div></div>
+    </div></details>
+    <details><summary>Dark mode</summary><label class="cp-field" style="grid-template-columns:24px 1fr;display:grid;margin-top:8px"><input type="checkbox" id="cpDarkOn"><span>Use dark colours when the phone is in dark mode</span></label><div class="cp-rows" id="cpGD"></div></details>
+    <div class="cp-actions"><button class="cp-btn ghost" type="button" id="cpReset">Reset to the original look</button></div>
+    <details><summary>For the GitHub copy of the app</summary><p class="cp-note">To use this look in the GitHub copy, press Copy, open <b>theme.css</b> in the repository, click the pencil, paste over the old text and commit.</p>
+      <div class="cp-actions"><button class="cp-btn ghost" type="button" id="cpCopy">Copy theme.css</button></div><textarea id="cpCss" readonly spellcheck="false" aria-label="theme.css"></textarea></details>
+  </aside>
+  <div class="cp-main"><div class="cp-top"><div class="cp-seg" role="group" aria-label="Preview mode"><button type="button" id="cpPvL" aria-pressed="true">☀ Light</button><button type="button" id="cpPvD" aria-pressed="false">☾ Dark</button></div>
+    <span class="cp-note">The app's screens with sample words. Each screen can be scrolled.</span></div><div class="cp-phones" id="cpPhones"></div></div>`;
+  CP_COLORS.forEach(([, items], i) => items.forEach(([k, l, h]) => $("#cpG" + i).appendChild(cpColorRow("cpc-" + k, l, h, () => CPS.c[k], v => CPS.c[k] = v))));
+  CP_DARK.forEach(([k, l]) => $("#cpGD").appendChild(cpColorRow("cpd-" + k, l, "", () => CPS.d[k], v => CPS.d[k] = v)));
+  const fh = $("#cpHead"), ft = $("#cpText");
+  Object.entries(CP_FONTS).forEach(([k, v]) => [fh, ft].forEach(sel => { const o = document.createElement("option"); o.value = k; o.textContent = v[0]; sel.appendChild(o); }));
+  fh.onchange = () => { CPS.head = fh.value; cpRefresh(); }; ft.onchange = () => { CPS.text = ft.value; cpRefresh(); };
+  [["cpSize", "size", v => v + "%"], ["cpWord", "word", v => (+v).toFixed(2) + "rem"], ["cpRad", "radius", v => v + "px"], ["cpRail", "rail", v => v + "px"]].forEach(([id, k, fmt]) => {
+    const r = $("#" + id), o = r.nextElementSibling;
+    r.addEventListener("input", () => { CPS[k] = +r.value; o.textContent = fmt(r.value); cpRefresh(); });
+    cpSync.push(() => { r.value = CPS[k]; o.textContent = fmt(CPS[k]); });
+  });
+  const dk = $("#cpDarkOn"); dk.onchange = () => { CPS.darkOn = dk.checked; cpRefresh(); };
+  cpSync.push(() => { fh.value = CPS.head; ft.value = CPS.text; dk.checked = CPS.darkOn; });
+  CP_PRESETS.forEach(([name, c, d]) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "cp-preset"; const col = Object.assign({}, CP_DEFAULT.c, c);
+    b.innerHTML = `<span class="sw"><i style="background:${col.brick}"></i><i style="background:${col.gold}"></i><i style="background:${col.surface}"></i><i style="background:${col.sand}"></i></span>${name}`;
+    b.onclick = () => { CPS.c = Object.assign({}, CP_DEFAULT.c, c); CPS.d = Object.assign({}, CP_DEFAULT.d, d); cpSyncAll(); cpRefresh(); };
+    $("#cpPresets").appendChild(b);
+  });
+  $("#cpReset").onclick = () => { CPS = cpClone(CP_DEFAULT); CPS.parts = {}; cpSyncAll(); cpSelect(CP_SELPART); cpRefresh(); };
+  $("#cpPartSel").onchange = e => cpSelect(e.target.value);
+  $("#cpClose").onclick = closeControlPanel;
+  const pl = $("#cpPvL"), pd = $("#cpPvD");
+  const setPv = d => { CP_DARKPV = d; pl.setAttribute("aria-pressed", String(!d)); pd.setAttribute("aria-pressed", String(d)); cpRefresh(); };
+  pl.onclick = () => setPv(false); pd.onclick = () => setPv(true);
+  $("#cpCopy").onclick = async () => { const ta = $("#cpCss"); try { await navigator.clipboard.writeText(ta.value); cpStatus("theme.css copied.", "ok"); } catch (e) { ta.focus(); ta.select(); cpStatus("The text is selected: press Ctrl+C (or long-press → Copy)."); } };
+  $("#cpSave").onclick = async () => {
+    const db = await getDb();
+    if (!db) { cpStatus("Saving works on the published claude.ai page. Here, use Copy theme.css below.", "err"); $("#cpCss").closest("details").open = true; return; }
+    $("#cpSave").disabled = true; cpStatus("Saving…");
+    try { const css = cpExport(); await db.doc("settings/theme").set({ css, settings: JSON.stringify(CPS), t: Date.now() }); applySharedTheme(css); cpStatus("Saved. Everyone now sees this look.", "ok"); }
+    catch (e) { cpStatus("Could not save (" + (e && e.message || e) + "). Only the owner of the page can save.", "err"); }
+    $("#cpSave").disabled = false;
+  };
+  cpSyncAll();
+  const ph = $("#cpPhones");
+  CP_SCREENS.forEach(([key, name]) => {
+    const fig = document.createElement("figure"); fig.innerHTML = `<figcaption>${name}</figcaption><div class="cp-phone"><iframe title="${name} screen"></iframe></div>`;
+    const ifr = fig.querySelector("iframe"); ifr.srcdoc = cpFrameDoc(key); CP_FRAMES.push([ifr, key]); ph.appendChild(fig);
+    ifr.addEventListener("load", () => { const doc = ifr.contentDocument; if (!doc) return;
+      doc.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); const id = cpPartOf(e.target); if (id) cpSelect(id); }, true);
+      cpMark(); });
+  });
+  cpRefresh();
+}
+async function openControlPanel() {
+  const box = $("#cp"); box.hidden = false; document.body.style.overflow = "hidden";
+  if (CP_BUILT) return; CP_BUILT = true;
+  box.innerHTML = `<p style="padding:20px">Loading the control panel…</p>`;
+  CP_BASE = document.querySelector("style").textContent.replace(/<\/style/gi, "<\\/style");
+  try { CP_FILE = (await (await fetch("theme.css", { cache: "no-cache" })).text()).replace(/<\/style/gi, "<\\/style"); } catch (e) { CP_FILE = ""; }
+  try { CP_SNAPS = await (await fetch("control-snaps.json", { cache: "no-cache" })).json(); } catch (e) { CP_SNAPS = {}; }
+  const shared = await readSharedTheme();
+  CPS = cpClone(CP_DEFAULT); CPS.parts = {};
+  if (shared && shared.settings) { try { const s = JSON.parse(shared.settings); CPS = Object.assign(cpClone(CP_DEFAULT), s, { c: Object.assign({}, CP_DEFAULT.c, s.c), d: Object.assign({}, CP_DEFAULT.d, s.d), parts: s.parts || {} }); } catch (e) {} }
+  await buildControlPanel();
+  if (!(await getDb())) cpStatus("Saving for everyone works on the published claude.ai page. Here you can preview and copy theme.css.");
+}
+function closeControlPanel() { $("#cp").hidden = true; document.body.style.overflow = ""; if (location.hash === "#control-panel") history.replaceState(null, "", location.pathname + location.search); }
+function checkHash() { if (location.hash === "#control-panel") openControlPanel(); }
+addEventListener("hashchange", checkHash);
+checkHash();
+
+/* ---------- navigation ---------- */
+const VIEWS = ["today", "history", "practice", "quiz", "search", "about"];
+function showView(v) {
+  VIEWS.forEach(x => $("#v-" + x).hidden = x !== v);
+  document.querySelectorAll(".tab-bar button, .about-btn").forEach(b => b.classList.toggle("active", b.dataset.v === v));
+  if (v === "today") renderToday(); if (v === "history") renderHistory(); if (v === "about") renderAbout(); if (v === "search") renderSearchHint();
+  if ((v === "practice" || v === "quiz") && !(RUN && RUN.kind === v && !RUN.finished && $("#" + v + "Box").querySelector(".qcard"))) renderSetup(v);
+  window.scrollTo(0, 0);
+}
+
+/* ---------- install ---------- */
+let deferredPrompt = null;
+const isStandalone = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+function updateInstallUI() { const inst = isStandalone(); $("#installPanel").hidden = inst; $("#installBar").classList.toggle("show", !inst && !ls.get("wt_install_dismiss") && (!!deferredPrompt || isIOS())); }
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferredPrompt = e; updateInstallUI(); });
+window.addEventListener("appinstalled", () => { deferredPrompt = null; toast("The app is installed. Find it on your home screen."); updateInstallUI(); });
+async function doInstall() {
+  if (isStandalone()) { toast("The app is already installed."); return; }
+  if (deferredPrompt) { deferredPrompt.prompt(); try { await deferredPrompt.userChoice; } catch (_) {} deferredPrompt = null; updateInstallUI(); return; }
+  const ios = isIOS();
+  openSheet(`<div class="howto"><h3 style="color:var(--heading);margin-top:0">Install Vocabulary: Learn and Test</h3>${ios
+    ? `<ol><li>Tap the <b>Share</b> button at the bottom of Safari.</li><li>Tap <b>Add to Home Screen</b>.</li><li>Tap <b>Add</b>.</li></ol><p class="note">On iPhone this works only in Safari.</p>`
+    : `<ol><li>Tap the <b>⋮</b> menu at the top right of Chrome.</li><li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Tap <b>Install</b>.</li></ol><p class="note">If you don't see the option, open this page in Chrome.</p>`}</div>`);
+}
+
+/* ---------- events ---------- */
+document.addEventListener("click", ev => {
+  const t = ev.target;
+  const tab = t.closest(".tab-bar button, .about-btn"); if (tab) { showView(tab.dataset.v); return; }
+  if (t.closest("[data-close]")) { closeSheet(); return; }
+  if (t.closest("[data-install]")) { doInstall(); return; }
+  const op = t.closest("[data-open]"); if (op) { openWord(op.dataset.open); return; }
+  const sy = t.closest("[data-syn]"); if (sy) { openSyn(sy.dataset.syn); return; }
+  const seg = t.closest(".seg button"); if (seg) { const kind = seg.closest("#practiceBox") ? "practice" : "quiz", k = seg.parentElement.dataset.set;
+    SETUP[kind][k] = k === "n" ? +seg.dataset.val : seg.dataset.val; renderSetup(kind); return; }
+  const st = t.closest("[data-start]"); if (st) { const kind = st.dataset.start; startTest(kind, kind === "practice" ? LIST.all.map(e => e.key) : learnedKeys()); return; }
+  const go = t.closest("[data-goto]"); if (go && go.dataset.goto === "practice-miss") { closeSheet();
+    const miss = Object.keys(MISS).filter(k => LIST.map[k]); startTest("practice", miss, { mode: "wm", n: Math.min(miss.length, 20), label: "My mistakes" }); return; }
+  const o = t.closest("[data-opt]"); if (o && RUN) { answer(+o.dataset.opt); return; }
+  if (t.closest("[data-next]")) { nextQ(); return; }
+  if (t.closest("[data-quit]")) { finish(true); return; }
+  if (t.closest("[data-again]")) { const k = RUN.kind; RUN = null; renderSetup(k); window.scrollTo(0, 0); return; }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+$("#installClose").onclick = () => { ls.set("wt_install_dismiss", 1); updateInstallUI(); };
+$("#clearScores").onclick = () => { if (confirm("Clear all test scores and the revision list on this phone?")) { SCORES = []; MISS = {}; saveScores(); renderAbout(); toast("Scores and revision list cleared."); } };
+
+/* ---------- start ---------- */
+(async function init() {
+    let started = false; const start = () => { if (started) return; started = true; $("#splash").classList.add("hide"); };
+  $("#goBtn").onclick = () => { ls.set("wt_seen", 1); start(); };
+  if (ls.get("wt_seen")) { $("#goBtn").hidden = true; $("#splash").onclick = start; setTimeout(start, 1400); }
+  PROG = ls.get("wt3_prog");
+  try { LIST = await loadList(); renderToday(); }
+  catch (err) { $("#todayCards").innerHTML = `<div class="load-error">The word list could not be loaded (${esc(err.message || err)}). Check that <b>words.xlsx</b> is in the same folder as index.html, and that the phone is online.</div>`; }
+})();
+const setBar = () => document.documentElement.style.setProperty("--barh", $(".app-bar").offsetHeight + "px");
+setBar(); addEventListener("resize", setBar);
+updateInstallUI();
+if ("serviceWorker" in navigator && window.isSecureContext) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>

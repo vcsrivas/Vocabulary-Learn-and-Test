@@ -1,0 +1,33 @@
+{
+  "id": "./",
+  "name": "Vocabulary: Learn and Test",
+  "short_name": "Vocabulary",
+  "description": "Vocabulary: Learn and Test. Five expert English words a day, with practice tests and quizzes. Developed by Dr. V C Srivastava.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1f3a68",
+  "theme_color": "#1f3a68",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
