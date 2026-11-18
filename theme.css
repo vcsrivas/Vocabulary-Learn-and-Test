@@ -1,4 +1,4 @@
-/* Vocabulary: Learn and Test — app theme (made with the theme editor) */
+/* Vocabulary: Learn and Test — app theme (made with the control panel) */
 @import url("https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&display=swap");
 :root {
   --brick: #1f3a68;
@@ -36,3 +36,43 @@
 @media (prefers-color-scheme: dark) {
   :root { --sand: #0f141c; --paper: #18202c; --surface: #18202c; --wordchip: #1d2734; --ink: #e6ebf2; --muted: #9aa7b8; --line: #2b3645; --heading: #9ec1ff; --chip: #22304a; --tag-ink: #c6d6f2; --hover: #22304a; --mark: #5a4a17; --ok: #7fd39b; --ok-bg: #1d2e22; --bad: #f19a8f; --bad-bg: #3a201c; --warn-bg: #211d14; --warn-line: #54451f; --note-ink: #d6cbb0; color-scheme: dark; }
 }
+/* Parts changed one by one */
+/* Left strip */
+.tab-bar { background: #90d0b4 !important; }
+/* Tabs in the strip */
+.tab-bar button { background: #3e2e42 !important; color: #ffffff !important; font-size: 2.25rem !important; border-radius: 15px !important; }
+/* Top bar */
+.app-bar { background: #0d2754 !important; }
+/* App title */
+.app-names h1 { font-size: 1.05rem !important; }
+/* Top bar subtitle */
+.app-names p { font-size: 0.75rem !important; }
+/* Word cards */
+.card { border-color: #4d9aff !important; border-top-color: #174582 !important; }
+/* Screen headings */
+.day-head h2 { font-size: 1.45rem !important; }
+/* Line under the heading */
+.date-line { color: #000000 !important; font-size: 0.95rem !important; }
+/* Labels (MEANING, USAGE …) */
+.lbl { color: #001df5 !important; font-size: 0.65rem !important; font-weight: 700 !important; }
+/* Part-of-speech tag */
+.tag.pos { background: #a4dff9 !important; }
+/* Meaning */
+.meaning { color: #000000 !important; }
+/* Usage sentence */
+.usage { color: #050505 !important; }
+/* Synonym buttons */
+.syn { background: #f4f7c5 !important; color: #000000 !important; border-color: #b2cbf0 !important; font-size: 1.00rem !important; }
+/* Word buttons */
+.word-chip { background: #e6f2ab !important; }
+/* Question card */
+.qcard { border-color: #424fff !important; }
+/* Option buttons (type, number) */
+.seg button { background: #b9eee8 !important; }
+/* Chosen option buttons */
+.seg button[aria-pressed="true"] { background: #33371b !important; }
+/* Opening screen background */
+.splash { background: #0a1648 !important; }
+/* Opening screen highlight (Learn and Test) */
+.splash h1 em { color: #96f8f7 !important; font-size: 1.75rem !important; }
+/* control-panel-settings: {"head":"Mukta","text":"device","size":105,"word":1.75,"radius":18,"rail":50,"darkOn":true,"c":{"brick":"#1f3a68","brick-2":"#2f5597","on-brick":"#ffffff","splash-accent":"#ffd36b","logo-bg":"#ffffff","heading":"#1f3a68","gold":"#6ca2ea","sand":"#eef2f8","paper":"#ffffff","surface":"#b6f7fb","ink":"#1b2433","muted":"#5d6b82","line":"#d6deea","chip":"#e3eaf5","tag-ink":"#2a3f66","wordchip":"#eef2f8","hover":"#eaf0fa","mark":"#f0e8d1","ok":"#2f7d4a","ok-bg":"#e6f3ea","bad":"#b0352b","bad-bg":"#fbe8e5","warn-bg":"#fff8e6","warn-line":"#f0d79a","note-ink":"#0c1118"},"d":{"sand":"#0f141c","paper":"#18202c","surface":"#18202c","wordchip":"#1d2734","ink":"#e6ebf2","muted":"#9aa7b8","line":"#2b3645","heading":"#9ec1ff","chip":"#22304a","tag-ink":"#c6d6f2","hover":"#22304a","mark":"#5a4a17","ok":"#7fd39b","ok-bg":"#1d2e22","bad":"#f19a8f","bad-bg":"#3a201c","warn-bg":"#211d14","warn-line":"#54451f","note-ink":"#d6cbb0"},"parts":{"strip":{"bg":"#90d0b4"},"tab":{"color":"#ffffff","size":"2.25","radius":15,"bg":"#3e2e42"},"bar":{"bg":"#0d2754"},"title":{"size":"1.05"},"subtitle":{"size":"0.75"},"card":{"top":"#174582","border":"#4d9aff"},"heading":{"size":"1.45"},"dateLine":{"size":"0.95","color":"#000000"},"lbl":{"color":"#001df5","size":"0.65","weight":"700"},"pos":{"bg":"#a4dff9"},"meaning":{"color":"#000000"},"usage":{"color":"#050505"},"syn":{"size":"1.00","border":"#b2cbf0","bg":"#f4f7c5","color":"#000000"},"chip":{"bg":"#e6f2ab"},"qcard":{"border":"#424fff"},"seg":{"bg":"#b9eee8"},"segOn":{"bg":"#33371b"},"splash":{"bg":"#0a1648"},"splashEm":{"color":"#96f8f7","size":"1.75"}}} */
