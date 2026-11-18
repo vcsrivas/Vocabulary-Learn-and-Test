@@ -43,27 +43,3 @@ Replace `words.xlsx` in this repository with a new file of the same name. The ap
 Word, Part of Speech, Meaning, Usage (example), Other Meanings, Synonyms.
 
 Other Meanings are separated by ` | `, and each can start with a part of speech such as `(nou.)`, `(adj.)`, `(ver.)` or `(adv.)`. Synonyms are separated by commas.
-
-## Acknowledgements
-
-Most meanings, synonyms and other meanings in `words.xlsx` (1,662 words) come from **Princeton WordNet**, the lexical database of English created at Princeton University. Usage examples come from WordNet where it has one (594 words); the other examples were written for this app with the help of AI.
-
-The list also includes words taught in *Word Power Made Easy* by Norman Lewis and words listed in *Roget's Thesaurus of Words for Writers* by David Olsen, Michelle Bevilacqua, Justin Cord Hayes and Robert Bly, and headwords from *The Oxford Thesaurus: An A–Z Dictionary of Synonyms* by Laurence Urdang, as well as the words in Dr. V C Srivastava's own Word Power list. Only the words are taken from these books; none of their definitions, synonym lists or example sentences are used. For 2,735 of these words that are not in the WordNet file, the meaning, synonyms and example were written for this app with the help of AI. The **Meaning Source** and **Example Source** columns in `words.xlsx` show which is which.
-
-> WordNet 3.0 Copyright 2006 by Princeton University. All rights reserved.
-> Used under the WordNet 3.0 licence (https://wordnet.princeton.edu/license-and-commercial-use).
-
-The WordNet data was taken from **Open English WordNet** (https://github.com/globalwordnet/english-wordnet), the open-source edition of Princeton WordNet, released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).
-
-Word frequency scores, used only to choose expert-level words, come from the OpenSubtitles 2018 frequency list (https://github.com/hermitdave/FrequencyWords, CC BY-SA 4.0).
-
-### References
-
-- Lewis, Norman. *Word Power Made Easy*. (Source of some of the words in the list; no text from the book is used.)
-- Urdang, Laurence. *The Oxford Thesaurus: An A–Z Dictionary of Synonyms*. Oxford University Press. (Source of some of the words in the list; no text from the book is used.)
-- Olsen, David, et al. *Roget's Thesaurus of Words for Writers*. Adams Media. (Source of some of the words in the list; no text from the book is used.)
-- Princeton University. "About WordNet." *WordNet*. Princeton University, 2010. https://wordnet.princeton.edu/
-- Miller, George A. (1995). "WordNet: A Lexical Database for English." *Communications of the ACM*, 38(11), 39–41.
-- Fellbaum, Christiane (ed.) (1998). *WordNet: An Electronic Lexical Database*. Cambridge, MA: MIT Press.
-
-Cambridge Dictionary and the Oxford Learner's Dictionaries are only linked to. None of their content is copied into this app.
