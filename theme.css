@@ -53,7 +53,7 @@
 .day-head h2 { font-size: 1.45rem !important; }
 /* Line under the heading */
 .date-line { color: #000000 !important; font-size: 0.95rem !important; }
-/* Labels (MEANING, USAGE …) */
+/* Labels (MEANING, USAGE, RELATED WORDS …) */
 .lbl { color: #001df5 !important; font-size: 0.65rem !important; font-weight: 700 !important; }
 /* Part-of-speech tag */
 .tag.pos { background: #a4dff9 !important; }
@@ -61,7 +61,7 @@
 .meaning { color: #000000 !important; }
 /* Usage sentence */
 .usage { color: #050505 !important; }
-/* Synonym buttons */
+/* Related-word buttons */
 .syn { background: #f4f7c5 !important; color: #000000 !important; border-color: #b2cbf0 !important; font-size: 1.00rem !important; }
 /* Word buttons */
 .word-chip { background: #e6f2ab !important; }

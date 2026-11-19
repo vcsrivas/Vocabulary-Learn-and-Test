@@ -358,7 +358,7 @@ main { max-width: 640px; margin: 0 auto; padding: 14px 14px 24px; }
       <p><b>History</b> keeps every day's words. Words you got wrong in a test are listed at the top under <i>Words to revise</i>.</p>
       <p>Use the strip on the left to move between <b>Today</b>, <b>History</b>, <b>Practice Test</b>, <b>Quiz</b> and <b>Search</b>. This page opens from the <b>About</b> button at the top.</p>
       <p><b>Practice Test</b> tests you on words from the whole list. <b>Quiz</b> tests you only on the words you have already learnt. Both have three kinds of question: word → meaning, meaning → word, and fill in the blank.</p>
-      <p>Every word has <b>Oxford</b> and <b>Cambridge</b> buttons that open its entry in those dictionaries. Tap a synonym to look it up too.</p>
+      <p>Every word has <b>Oxford</b> and <b>Cambridge</b> buttons that open its entry in those dictionaries. Tap a related word to look it up too.</p>
       <p class="note">Your words, scores and revision list are kept only on this phone.</p></div>
     <div class="panel"><h3>Start again</h3><p class="note">Clear test scores and the revision list on this phone. Your daily words are kept.</p><button class="btn ghost" type="button" id="clearScores">Clear scores and revision list</button></div>
     <aside class="disclaimer" role="note"><h3>Disclaimer</h3><p lang="en">This app has been made using an AI platform. Although much care has been taken for its correctness, it may still contain errors, so please use it with caution and check important words in a standard dictionary.</p></aside>
@@ -392,7 +392,7 @@ const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.f
 
 /* ---------- word list (words.xlsx, every tab with Word and Meaning columns) ---------- */
 let LIST = null;
-const COLS = { word: /^word$/, pos: /^part of speech$/, meaning: /^meaning$/, usage: /^usage/, syn: /^synonyms?$/, other: /^other meanings?$/, msrc: /^meaning source$/ };
+const COLS = { word: /^word$/, pos: /^part of speech$/, meaning: /^meaning$/, usage: /^usage/, syn: /^(synonyms?|related words?)$/, other: /^other meanings?$/, msrc: /^meaning source$/ };
 function parseWorkbook(wb) {
   return parseSheets(wb.SheetNames.map(name => XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: "" })));
 }
@@ -488,7 +488,7 @@ function cardHTML(key, num) {
     ${e.pos ? `<div class="tags"><span class="tag pos">${esc(e.pos)}</span></div>` : ""}
     <span class="lbl">Meaning</span><p class="meaning">${esc(e.m)}</p>
     ${e.u ? `<span class="lbl">Usage</span><p class="usage">${hl(e.u, e.w)}</p>` : ""}
-    ${sy.length ? `<span class="lbl">Synonyms</span><div class="syns">${sy.map(x => `<button class="syn" type="button" data-syn="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
+    ${sy.length ? `<span class="lbl">Related words</span><div class="syns">${sy.map(x => `<button class="syn" type="button" data-syn="${esc(x)}">${esc(x)}</button>`).join("")}</div>` : ""}
     ${ot.length ? `<span class="lbl">Other meanings</span><ol class="olist">${ot.map(o => `<li>${o.p ? `<span class="op">${esc(o.p)}</span>` : ""}${esc(o.t)}</li>`).join("")}</ol>` : ""}
     <div class="dicts"><a class="dict main" href="${oxfordUrl(e.w)}" target="_blank" rel="noopener">Oxford <small>↗</small></a><a class="dict main" href="${cambridgeUrl(e.w)}" target="_blank" rel="noopener">Cambridge <small>↗</small></a></div>
   </article>`;
@@ -497,7 +497,7 @@ function openSheet(html) { $("#sheetBody").innerHTML = html; $("#sheet").hidden 
 function closeSheet() { $("#sheet").hidden = true; }
 function openWord(key, from) { if (LIST && LIST.map[key]) openSheet((from ? `<p class="sheet-from">${esc(from)}</p>` : "") + cardHTML(key)); }
 function openSyn(w) {
-  openSheet(`<p class="sheet-from">Look up this synonym in</p><p class="pick-word">${esc(w)}</p>
+  openSheet(`<p class="sheet-from">Look up this word in</p><p class="pick-word">${esc(w)}</p>
     <div class="dicts"><a class="dict main" href="${oxfordUrl(w)}" target="_blank" rel="noopener">Oxford <small>↗</small></a><a class="dict main" href="${cambridgeUrl(w)}" target="_blank" rel="noopener">Cambridge <small>↗</small></a></div>
     ${LIST.map[w.toLowerCase()] ? `<p style="margin-top:12px"><button class="linkbtn" type="button" data-open="${esc(w.toLowerCase())}">This word is also in your list: open its card</button></p>` : ""}`);
 }
@@ -649,7 +649,7 @@ function renderSetup(kind) {
     </div>${scoresHTML(kind)}`;
 }
 
-/* ---------- two-way search: by word, or by words in the meaning and synonyms ---------- */
+/* ---------- two-way search: by word, or by words in the meaning and related words ---------- */
 let SUG = [], SEL = -1;
 const hlq = (text, q) => { const t = String(text); const i = t.toLowerCase().indexOf(q); if (!q || i < 0) return esc(t);
   return esc(t.slice(0, i)) + "<mark>" + esc(t.slice(i, i + q.length)) + "</mark>" + esc(t.slice(i + q.length)); };
@@ -668,7 +668,7 @@ function searchWords(q) {
 function snippet(e, q) {
   const wre = new RegExp("\\b" + reEsc(q), "i");
   if (wre.test(e.m)) return hlq(e.m, q);
-  const x = listOf(e.syn).find(y => wre.test(y)); return "Synonym: " + hlq(x || e.syn, q);
+  const x = listOf(e.syn).find(y => wre.test(y)); return "Related word: " + hlq(x || e.syn, q);
 }
 function renderSuggestions() {
   const inp = $("#searchInput"), ul = $("#suggestions"), q = inp.value.trim().toLowerCase();
@@ -734,7 +734,7 @@ const CP_COLORS = [
   ["Top bar, opening screen and main buttons", [["brick", "Top bar and main buttons", "Also Start, Oxford, Cambridge, opening screen"], ["brick-2", "Top bar second colour", "Gradient end of top bar and opening screen"], ["on-brick", "Text on top bar and buttons", ""], ["splash-accent", "Opening screen highlight", "\"Learn and Test\""], ["logo-bg", "Logo background", ""]]],
   ["Headings and accent", [["heading", "Headings and words", "Screen headings, words on cards, open tab"], ["gold", "Accent", "Card top line, numbers, progress bar, score ring"]]],
   ["Background, cards, left strip and text", [["sand", "Page background", ""], ["paper", "Cards", "Word cards, panels, answer options"], ["surface", "Left strip and light buttons", ""], ["ink", "Main text", ""], ["muted", "Secondary text", "Dates, labels, notes"], ["line", "Borders", ""]]],
-  ["Tags, word buttons and highlights", [["chip", "Tag background", "Part of speech, streak"], ["tag-ink", "Tag text", ""], ["wordchip", "Word buttons", "History words and synonyms"], ["hover", "Hover and selected", ""], ["mark", "Word highlight in usage", ""]]],
+  ["Tags, word buttons and highlights", [["chip", "Tag background", "Part of speech, streak"], ["tag-ink", "Tag text", ""], ["wordchip", "Word buttons", "History words and related words"], ["hover", "Hover and selected", ""], ["mark", "Word highlight in usage", ""]]],
   ["Right and wrong answers", [["ok", "Right answer", ""], ["ok-bg", "Right answer background", ""], ["bad", "Wrong answer", ""], ["bad-bg", "Wrong answer background", ""]]],
   ["Disclaimer and words to revise", [["warn-bg", "Background", ""], ["warn-line", "Border", ""], ["note-ink", "Disclaimer text", ""]]],
 ];
@@ -776,9 +776,9 @@ const CP_PARTS = [
   ["strip", "Left strip", ".tab-bar", "Top bar and left strip"], ["tabOn", "Open tab in the strip", ".tab-bar button.active", "Top bar and left strip"], ["tab", "Tabs in the strip", ".tab-bar button", "Top bar and left strip"],
   ["page", "Page background", "body", "Every screen"], ["heading", "Screen headings", ".day-head h2", "Every screen"], ["dateLine", "Line under the heading", ".date-line", "Every screen"],
   ["streak", "Day-streak label", ".streak", "Today"], ["card", "Word cards", ".card", "Today and word card", 1], ["cardNum", "Word number on cards", ".card .num", "Today and word card"],
-  ["word", "Word on cards", ".card .word", "Today and word card"], ["pos", "Part-of-speech tag", ".tag.pos", "Today and word card"], ["lbl", "Labels (MEANING, USAGE …)", ".lbl", "Today and word card"],
+  ["word", "Word on cards", ".card .word", "Today and word card"], ["pos", "Part-of-speech tag", ".tag.pos", "Today and word card"], ["lbl", "Labels (MEANING, USAGE, RELATED WORDS …)", ".lbl", "Today and word card"],
   ["meaning", "Meaning", ".meaning", "Today and word card"], ["usage", "Usage sentence", ".usage", "Today and word card"], ["usageMark", "Highlighted word in usage", ".usage mark", "Today and word card"],
-  ["syn", "Synonym buttons", ".syn", "Today and word card"], ["olist", "Other meanings", ".olist", "Today and word card"], ["dict", "Oxford and Cambridge buttons", ".dict.main", "Today and word card"],
+  ["syn", "Related-word buttons", ".syn", "Today and word card"], ["olist", "Other meanings", ".olist", "Today and word card"], ["dict", "Oxford and Cambridge buttons", ".dict.main", "Today and word card"],
   ["sheet", "Pop-up behind the word card", ".sheet-panel", "Today and word card"],
   ["revise", "Words-to-revise box", ".day.revise", "History", 1], ["dayBox", "Day boxes", ".day", "History"], ["dayTitle", "Day names (Today, Yesterday …)", ".day-title strong", "History"],
   ["dayDate", "Dates in day boxes", ".day-title span", "History"], ["chipMiss", "Words-to-revise buttons", ".word-chip.miss", "History"], ["chip", "Word buttons", ".word-chip", "History"],
@@ -830,7 +830,8 @@ const cpLightVars = () => Object.entries(CPS.c).map(([k, v]) => `--${k}: ${v};`)
 function cpExport() {
   const imp = cpFontImport();
   return "/* Vocabulary: Learn and Test — app theme (made with the control panel) */\n" + (imp ? `@import url("${imp}");\n` : "") + cpRoot() + "\n" +
-    `@media (prefers-color-scheme: dark) {\n  :root { ${CPS.darkOn ? cpDarkVars() : cpLightVars()} }\n}\n` + (cpPartRules() ? "/* Parts changed one by one */\n" + cpPartRules() + "\n" : "");
+    `@media (prefers-color-scheme: dark) {\n  :root { ${CPS.darkOn ? cpDarkVars() : cpLightVars()} }\n}\n` + (cpPartRules() ? "/* Parts changed one by one */\n" + cpPartRules() + "\n" : "") +
+    "/* control-panel-settings: " + JSON.stringify(CPS).replace(/\*\//g, "* /") + " */\n";
 }
 const cpPreviewTheme = () => cpRoot() + `\n:root { ${CP_DARKPV && CPS.darkOn ? cpDarkVars() : cpLightVars()} }\n` + cpPartRules() + "\n.cp-sel { outline: 3px dashed #ff2d55 !important; outline-offset: 2px !important; }";
 const CP_SCREENS = [["splash", "Opening screen"], ["today", "Today"], ["history", "History"], ["sheet", "Word card"], ["practice", "Practice Test"], ["question", "A test question"], ["result", "Quiz result"], ["search", "Search"], ["about", "About"]];
@@ -981,7 +982,7 @@ async function buildControlPanel() {
     catch (e) { cpStatus("Could not save (" + (e && e.message || e) + "). Only the owner of the page can save.", "err"); }
     $("#cpSave").disabled = false;
   };
-  cpSyncAll();
+  cpSyncAll(); cpChangedList();
   const ph = $("#cpPhones");
   CP_SCREENS.forEach(([key, name]) => {
     const fig = document.createElement("figure"); fig.innerHTML = `<figcaption>${name}</figcaption><div class="cp-phone"><iframe title="${name} screen"></iframe></div>`;
@@ -999,8 +1000,9 @@ async function openControlPanel() {
   CP_BASE = document.querySelector("style").textContent.replace(/<\/style/gi, "<\\/style");
   try { CP_FILE = (await (await fetch("theme.css", { cache: "no-cache" })).text()).replace(/<\/style/gi, "<\\/style"); } catch (e) { CP_FILE = ""; }
   try { CP_SNAPS = await (await fetch("control-snaps.json", { cache: "no-cache" })).json(); } catch (e) { CP_SNAPS = {}; }
-  const shared = await readSharedTheme();
+  let shared = await readSharedTheme();
   CPS = cpClone(CP_DEFAULT); CPS.parts = {};
+  if (!(shared && shared.settings)) { const m = /\/\* control-panel-settings: (\{[\s\S]*?\}) \*\//.exec(CP_FILE); if (m) shared = { settings: m[1] }; }
   if (shared && shared.settings) { try { const s = JSON.parse(shared.settings); CPS = Object.assign(cpClone(CP_DEFAULT), s, { c: Object.assign({}, CP_DEFAULT.c, s.c), d: Object.assign({}, CP_DEFAULT.d, s.d), parts: s.parts || {} }); } catch (e) {} }
   await buildControlPanel();
   if (!(await getDb())) cpStatus("Saving for everyone works on the published claude.ai page. Here you can preview and copy theme.css.");
